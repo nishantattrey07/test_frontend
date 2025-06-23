@@ -1,14 +1,19 @@
-import { useState, useCallback, useEffect } from 'react';
-import { AppState, Song, MatchResult } from './types';
-import { useAudioRecording } from './hooks/useAudioRecording';
-import { musicAPI } from './services/musicApi';
-import { Header } from './components/Header';
-import { RecordButton } from './components/RecordButton';
-import { WaveformVisualizer } from './components/WaveformVisualizer';
-import { ProgressRing } from './components/ProgressRing';
-import { SongResult } from './components/SongResult';
+import { RotateCcw, History, Radio } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { ErrorCard } from './components/ErrorCard';
-import { RotateCcw } from 'lucide-react';
+import { ProgressRing } from './components/ProgressRing';
+import { RecordButton } from './components/RecordButton';
+import { SongResult } from './components/SongResult';
+import { WaveformVisualizer } from './components/WaveformVisualizer';
+import { MicToggleButton } from './components/MicToggleButton';
+import { ToastContainer } from './components/ToastNotification';
+import HistoryPanel from './components/HistoryPanel';
+import { useAudioRecording } from './hooks/useAudioRecording';
+import { useMicToggle } from './hooks/useMicToggle';
+import { useToast } from './hooks/useToast';
+import { musicAPI } from './services/musicApi';
+import { storageService } from './services/storageService';
+import { AppState, MatchResult, Song, MusicMatch } from './types';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('initial');
@@ -18,8 +23,12 @@ function App() {
   const [processingProgress, setProcessingProgress] = useState(0);
   const [canRecord, setCanRecord] = useState(true);
   const [timeUntilNextRequest, setTimeUntilNextRequest] = useState(0);
+  const [showHistory, setShowHistory] = useState(false);
+  const [sessionUUID] = useState(() => storageService.getSessionUUID());
 
   const { isRecording, audioData, startRecording, stopRecording } = useAudioRecording();
+  const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
+  const { toasts, showError, showInfo, removeToast } = useToast();
 
   // Update recording progress
   useEffect(() => {
@@ -61,6 +70,12 @@ function App() {
   const handleStartRecording = useCallback(async () => {
     if (!canRecord) return;
 
+    // Check if microphone is enabled
+    if (!isMicEnabled) {
+      showError('Microphone is off. Please turn it on to search music.');
+      return;
+    }
+
     setAppState('recording');
     setRecordingProgress(0);
     
@@ -93,8 +108,29 @@ function App() {
         setProcessingProgress(100);
         
         if (result.success && result.song) {
+          // Convert Song to MusicMatch for history storage
+          const musicMatch: MusicMatch = {
+            id: result.song.id,
+            title: result.song.title,
+            artist: result.song.artist,
+            album: result.song.album,
+            albumArt: result.song.artwork,
+            confidence: result.song.confidence * 100, // Convert to percentage
+            timestamp: Date.now(),
+            youtubeUrl: result.song.youtubeUrl || '#',
+            spotifyUrl: result.song.spotifyUrl,
+          };
+          
+          // Save to history
+          storageService.saveToHistory(musicMatch);
+          
           setCurrentSong(result.song);
           setAppState('result');
+          
+          // Haptic feedback on success
+          if ('vibrate' in navigator) {
+            navigator.vibrate([100, 50, 100]);
+          }
         } else {
           setErrorMessage(result.error || 'Unknown error occurred');
           setAppState('error');
@@ -108,7 +144,7 @@ function App() {
       setErrorMessage('Recording failed. Please try again.');
       setAppState('error');
     }
-  }, [canRecord, startRecording]);
+  }, [canRecord, startRecording, isMicEnabled, showError]);
 
   const handleReset = useCallback(() => {
     stopRecording();
@@ -245,7 +281,30 @@ function App() {
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col">
-        <Header />
+        {/* Modified Header with History Button */}
+        <header className="w-full p-6 text-center relative">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-accent-start to-accent-end">
+              <Radio size={24} className="text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-text-primary">
+              SoundWave
+            </h1>
+          </div>
+          <p className="text-text-secondary text-sm">
+            Premium Music Discovery
+          </p>
+          
+          {/* History Button - Top Right - Only show on main screen */}
+          {appState === 'initial' && (
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
+            >
+              <History className="w-5 h-5 text-white hover:text-accent-start transition-colors" />
+            </button>
+          )}
+        </header>
         
         <main className="flex-1 flex items-center justify-center px-6 pb-12">
           <div className="w-full max-w-md">
@@ -260,6 +319,24 @@ function App() {
           </p>
         </footer>
       </div>
+
+      {/* History Panel */}
+      {showHistory && (
+        <HistoryPanel onClose={() => setShowHistory(false)} />
+      )}
+
+      {/* Mic Toggle Button - Only show on main screen */}
+      {appState === 'initial' && (
+        <MicToggleButton
+          isMicEnabled={isMicEnabled}
+          isCheckingPermission={isCheckingPermission}
+          onToggle={toggleMic}
+          onShowToast={showInfo}
+        />
+      )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
