@@ -51,7 +51,7 @@ export const RecordButton: React.FC<RecordButtonProps> = ({
           {isRecording ? 'Listening...' : 'Tap to Find'}
         </span>
         <span className="text-sm text-text-secondary mt-1">
-          {isRecording ? 'Recording audio' : 'Music in 7 seconds'}
+          {isRecording ? 'Recording audio' : 'Find Music in 7 seconds'}
         </span>
       </div>
       

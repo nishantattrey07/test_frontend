@@ -11,13 +11,13 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onRemove }
   const getIcon = () => {
     switch (toast.type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-success" />;
+        return <CheckCircle className="w-4 h-4 text-success" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-error" />;
+        return <AlertCircle className="w-4 h-4 text-error" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
+        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
       default:
-        return <Info className="w-5 h-5 text-accent-start" />;
+        return <Info className="w-4 h-4 text-accent-start" />;
     }
   };
 
@@ -37,11 +37,14 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onRemove }
   return (
     <div
       className={`
-        fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50
-        glass backdrop-premium rounded-2xl p-4 shadow-float-lg
-        animate-slide-up max-w-sm mx-auto
-        border-2 ${getBorderColor()}
+        fixed top-40 left-1/2 z-50
+        glass rounded-2xl p-3 shadow-lg
+        animate-pop-in w-11/12 max-w-xs
+        border ${getBorderColor()}
       `}
+      style={{
+        transform: 'translate(-50%, 0)'
+      }}
     >
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">
@@ -49,7 +52,7 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onRemove }
         </div>
         
         <div className="flex-1 min-w-0">
-          <p className="text-white text-sm font-medium leading-relaxed">
+          <p className="text-white text-xs font-medium leading-relaxed">
             {toast.message}
           </p>
         </div>
@@ -58,7 +61,7 @@ const ToastNotification: React.FC<ToastNotificationProps> = ({ toast, onRemove }
           onClick={() => onRemove(toast.id)}
           className="flex-shrink-0 p-1 hover:bg-white/10 rounded-lg transition-colors duration-200"
         >
-          <X className="w-4 h-4 text-text-secondary hover:text-white" />
+          <X className="w-3 h-3 text-text-secondary hover:text-white" />
         </button>
       </div>
     </div>

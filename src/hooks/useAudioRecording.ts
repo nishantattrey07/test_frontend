@@ -115,10 +115,10 @@ export const useAudioRecording = () => {
 
         mediaRecorder.start();
         
-        // Stop recording after 7 seconds
+        // Stop recording after 5 seconds
         setTimeout(() => {
           stopRecording();
-        }, 7000);
+        }, 5000);
       });
       
     } catch (error) {

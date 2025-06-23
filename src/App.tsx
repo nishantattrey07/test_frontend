@@ -35,7 +35,7 @@ function App() {
     if (!isRecording) return;
 
     const startTime = Date.now();
-    const duration = 7000; // 7 seconds
+    const duration = 5000; // 5 seconds
 
     const updateProgress = () => {
       const elapsed = Date.now() - startTime;
@@ -214,7 +214,7 @@ function App() {
             <div className="text-text-primary">
               <h3 className="text-xl font-semibold mb-2">Listening...</h3>
               <p className="text-text-secondary">
-                Recording audio • {Math.ceil((100 - recordingProgress) * 0.07)}s remaining
+                Recording audio • {Math.ceil((100 - recordingProgress) * 0.05)}s remaining
               </p>
             </div>
           </div>

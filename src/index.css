@@ -33,17 +33,21 @@
 }
 
 /* Toast animations */
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
+.animate-pop-in {
+  animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
+@keyframes popIn {
+  0% {
+    transform: translate(-50%, 0) scale(0.7);
     opacity: 0;
   }
-  to {
-    transform: translateY(0);
+  60% {
+    transform: translate(-50%, 0) scale(1.08);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1);
     opacity: 1;
   }
 }
