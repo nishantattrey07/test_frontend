@@ -1,10 +1,8 @@
-import { RotateCcw, History, Radio } from 'lucide-react';
+import { History, Radio } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ErrorCard } from './components/ErrorCard';
-import { ProgressRing } from './components/ProgressRing';
 import { RecordButton } from './components/RecordButton';
 import { SongResult } from './components/SongResult';
-import { WaveformVisualizer } from './components/WaveformVisualizer';
 import { MicToggleButton } from './components/MicToggleButton';
 import { ToastContainer } from './components/ToastNotification';
 import HistoryPanel from './components/HistoryPanel';
@@ -24,9 +22,7 @@ function App() {
   const [canRecord, setCanRecord] = useState(true);
   const [timeUntilNextRequest, setTimeUntilNextRequest] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
-  const [sessionUUID] = useState(() => storageService.getSessionUUID());
-
-  const { isRecording, audioData, startRecording, stopRecording } = useAudioRecording();
+  const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
   const { toasts, showError, showInfo, removeToast } = useToast();
 
@@ -203,39 +199,34 @@ function App() {
       case 'recording':
         return (
           <div className="text-center">
-            <div className="mb-6">
-              <WaveformVisualizer audioData={audioData} isActive={isRecording} />
-            </div>
-            
-            <div className="mb-6">
-              <ProgressRing progress={recordingProgress} size={120} strokeWidth={6} />
-            </div>
-            
-            <div className="text-text-primary">
-              <h3 className="text-xl font-semibold mb-2">Listening...</h3>
-              <p className="text-text-secondary">
-                Recording audio • {Math.ceil((100 - recordingProgress) * 0.05)}s remaining
-              </p>
-            </div>
+            <RecordButton
+              onClick={() => {}} // No click during recording
+              disabled={true}
+              isRecording={true}
+              recordingProgress={recordingProgress}
+              remainingTime={Math.ceil((100 - recordingProgress) * 0.05)}
+            />
           </div>
         );
 
       case 'processing':
         return (
           <div className="text-center">
-            <div className="mb-6">
-              <RotateCcw size={48} className="text-accent-start mx-auto animate-spin-smooth" />
-            </div>
             
-            <div className="mb-6">
-              <ProgressRing progress={processingProgress} size={120} strokeWidth={6} />
-            </div>
             
-            <div className="text-text-primary">
-              <h3 className="text-xl font-semibold mb-2">Analyzing Audio</h3>
-              <p className="text-text-secondary">
-                Searching 50M songs...
-              </p>
+            <RecordButton
+              onClick={() => {}} // No click during processing
+              disabled={true}
+              isRecording={false}
+              isProcessing={true}
+              processingProgress={processingProgress}
+            />
+            
+            <div className="mt-6 flex items-center justify-center space-x-2">
+              <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+              <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+              <span className="text-sm text-text-secondary ml-3">Analyzing audio fingerprint...</span>
             </div>
           </div>
         );
