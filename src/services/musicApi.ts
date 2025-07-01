@@ -157,7 +157,7 @@ export class MusicIdentificationAPI {
       formData.append('audio_file', audioBlob, 'audio_sample.wav');
 
       // Make API request
-      const response = await fetch(`${API_BASE_URL}/api/v1/match`, {
+      const response = await fetch(`${API_BASE_URL}/v1/match`, {
         method: 'POST',
         headers: {
           'X-Client-ID': getClientId(),
