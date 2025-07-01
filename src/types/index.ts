@@ -9,11 +9,15 @@ export interface SongMetadata {
   song_id: number;
   song_title: string;
   duration_seconds: number | null;
+  track_popularity: number;
+  spotify_url: string;
+  youtube_url: string;
   youtube_id: string;
-  song_url: string | null;
+  apple_music_url: string;
   album_title: string | null;
   album_main_artist: string | null;
   artists: Artist[];
+  genres: string[];
 }
 
 // Backend response format
@@ -43,12 +47,16 @@ export interface Song {
   artwork: string;
   confidence: number;
   offset: number;
+  offsetFormatted: string;
   duration: number;
-  previewUrl?: string;
+  popularity: number;
   spotifyUrl?: string;
-  appleUrl?: string;
-  youtubeUrl?: string; // NEW: YouTube playback URL
-  artists?: Artist[]; // NEW: Full artist list
+  appleMusicUrl?: string;
+  youtubeUrl?: string; // YouTube Music URL
+  youtubePlaybackUrl?: string; // YouTube Music playback URL with timestamp
+  shareableUrl?: string; // Shareable link to the song with timestamp
+  artists?: Artist[]; // Full artist list
+  genres?: string[];
 }
 
 export interface MatchResult {

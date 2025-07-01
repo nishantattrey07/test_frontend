@@ -128,7 +128,7 @@ export const RecordButton: React.FC<RecordButtonProps> = ({
             </span>
           ) : (
             <span className="text-sm text-text-secondary mt-1">
-              Find Music in 5 seconds
+              Find Music in 7 seconds
             </span>
           )}
         </div>

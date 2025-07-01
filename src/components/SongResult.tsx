@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Song } from '../types';
-import { Play, Share2, ExternalLink, Clock, Award } from 'lucide-react';
+import { Play, Share2, ExternalLink, Clock, Award, Music } from 'lucide-react';
+
+// Global flag to prevent multiple auto-opens
+let hasGlobalAutoOpened = false;
 
 interface SongResultProps {
   song: Song;
@@ -15,6 +18,20 @@ export const SongResult: React.FC<SongResultProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  // Auto-open YouTube Music when result appears (only once globally)
+  useEffect(() => {
+    if (song.youtubePlaybackUrl && !hasGlobalAutoOpened) {
+      console.log('🎵 Auto-opening YouTube Music for song:', song.title); // Debug log
+      window.open(song.youtubePlaybackUrl, '_blank');
+      hasGlobalAutoOpened = true;
+      
+      // Reset the global flag after a short delay to allow for new searches
+      setTimeout(() => {
+        hasGlobalAutoOpened = false;
+      }, 2000);
+    }
+  }, [song.youtubePlaybackUrl, song.title]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -75,14 +92,26 @@ export const SongResult: React.FC<SongResultProps> = ({
           {/* Song Info */}
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold text-text-primary mb-1 leading-tight">
-              "{song.title}"
+              {song.title}
             </h2>
             <p className="text-lg text-text-secondary mb-2">
               by {song.artist}
             </p>
-            <p className="text-sm text-text-secondary/80">
+            <p className="text-sm text-text-secondary/80 mb-1">
               {song.album}
             </p>
+            {song.genres && song.genres.length > 0 && (
+              <div className="flex justify-center gap-1 mt-2">
+                {song.genres.slice(0, 2).map((genre, index) => (
+                  <span 
+                    key={index}
+                    className="px-2 py-1 text-xs bg-accent-start/20 text-accent-start rounded-full"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Stats */}
@@ -93,38 +122,65 @@ export const SongResult: React.FC<SongResultProps> = ({
                 {formatConfidence(song.confidence)}% Match
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <Clock size={16} className="text-text-secondary" />
-              <span className="text-text-secondary">
-                0:{song.offset.toString().padStart(2, '0')}
-              </span>
-            </div>
+            {song.offsetFormatted && (
+              <div className="flex items-center gap-1">
+                <Clock size={16} className="text-text-secondary" />
+                <span className="text-text-secondary">
+                  at {song.offsetFormatted}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              className="flex-1 bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-              onClick={() => window.open(song.spotifyUrl, '_blank')}
-            >
-              <Play size={18} />
-              <span>Play</span>
-            </button>
+          <div className="space-y-3">
+            {/* Primary Play Button */}
+            {song.youtubePlaybackUrl && (
+              <button
+                className="w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                onClick={() => window.open(song.youtubePlaybackUrl, '_blank')}
+              >
+                <Play size={18} />
+                <span>Play on YouTube Music</span>
+              </button>
+            )}
             
-            <button
-              onClick={onShare}
-              className="flex-1 bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30"
-            >
-              <Share2 size={18} />
-              <span>Share</span>
-            </button>
-
-            <button
-              onClick={() => window.open(song.spotifyUrl, '_blank')}
-              className="bg-primary-highlight/60 backdrop-blur-sm text-text-secondary p-3 rounded-xl hover:bg-primary-highlight/80 hover:text-text-primary hover:scale-105 transition-all duration-200 border border-primary-highlight/20"
-            >
-              <ExternalLink size={18} />
-            </button>
+            {/* Platform Buttons Row */}
+            <div className="flex gap-3">
+              {song.spotifyUrl && (
+                <button
+                  onClick={() => window.open(song.spotifyUrl, '_blank')}
+                  className="flex-1 bg-[#1DB954] hover:bg-[#1ed760] text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-all duration-200"
+                  title="Open in Spotify"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 17.568c-.227.378-.716.496-1.094.27-2.995-1.83-6.764-2.244-11.207-1.23-.45.105-.901-.225-1.006-.675-.105-.45.225-.901.675-1.006 4.875-1.112 9.066-.643 12.367 1.422.378.226.496.716.27 1.094l-.005.125zm1.568-3.482c-.285.473-.896.621-1.369.336-3.425-2.108-8.64-2.717-12.69-1.486-.533.162-1.097-.136-1.26-.669-.162-.533.136-1.097.669-1.26 4.653-1.413 10.451-.726 14.285 1.709.473.285.621.896.336 1.369l.029.001zm.137-3.629c-4.108-2.44-10.884-2.666-14.804-1.474-.64.195-1.316-.133-1.511-.773-.195-.64.133-1.316.773-1.511 4.492-1.367 12.04-1.104 16.731 1.704.573.342.761 1.08.418 1.653-.342.573-1.08.761-1.653.418l.046.003z"/>
+                  </svg>
+                  <span>Spotify</span>
+                </button>
+              )}
+              
+              {song.appleMusicUrl && (
+                <button
+                  onClick={() => window.open(song.appleMusicUrl, '_blank')}
+                  className="flex-1 bg-gradient-to-r from-[#FA243C] to-[#FF6B6B] text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-all duration-200"
+                  title="Open in Apple Music"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+                  </svg>
+                  <span>Apple</span>
+                </button>
+              )}
+              
+              <button
+                onClick={onShare}
+                className={`${song.spotifyUrl || song.appleMusicUrl ? 'flex-1' : 'flex-[2]'} bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30`}
+              >
+                <Share2 size={18} />
+                <span>Share</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -134,7 +190,7 @@ export const SongResult: React.FC<SongResultProps> = ({
         onClick={onTryAgain}
         className="w-full bg-primary-dark/80 backdrop-blur-sm text-text-secondary font-medium py-3 px-4 rounded-xl border border-primary-highlight/20 hover:bg-primary-highlight/30 hover:text-text-primary hover:border-primary-highlight/40 transition-all duration-200"
       >
-        Try Again
+        Discover Another Track
       </button>
     </div>
   );

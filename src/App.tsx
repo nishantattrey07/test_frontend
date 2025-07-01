@@ -2,6 +2,7 @@ import { History, Radio } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ErrorCard } from './components/ErrorCard';
 import { RecordButton } from './components/RecordButton';
+import { RecordingInterface } from './components/RecordingInterface';
 import { SongResult } from './components/SongResult';
 import { MicToggleButton } from './components/MicToggleButton';
 import { ToastContainer } from './components/ToastNotification';
@@ -153,13 +154,13 @@ function App() {
 
   const handleShare = useCallback(() => {
     if (currentSong) {
-      const shareText = `🎵 Just discovered "${currentSong.title}" by ${currentSong.artist} using SoundWave! #MusicDiscovery`;
+      const shareText = `🎵 Just discovered "${currentSong.title}" by ${currentSong.artist} at ${currentSong.offsetFormatted} using SoundWave! Listen: ${currentSong.shareableUrl} #MusicDiscovery`;
       
       if (navigator.share) {
         navigator.share({
           title: 'Music Discovery',
           text: shareText,
-          url: window.location.href
+          url: currentSong.shareableUrl || window.location.href
         }).catch(console.error);
       } else {
         // Fallback to clipboard
@@ -198,37 +199,28 @@ function App() {
 
       case 'recording':
         return (
-          <div className="text-center">
-            <RecordButton
-              onClick={() => {}} // No click during recording
-              disabled={true}
-              isRecording={true}
-              recordingProgress={recordingProgress}
-              remainingTime={Math.ceil((100 - recordingProgress) * 0.05)}
-            />
-          </div>
+          <RecordingInterface
+            isRecording={true}
+            isProcessing={false}
+            recordingProgress={recordingProgress}
+            processingProgress={0}
+            remainingTime={Math.ceil((100 - recordingProgress) * 0.05)}
+            onClick={() => {}} // No click during recording
+            disabled={true}
+          />
         );
 
       case 'processing':
         return (
-          <div className="text-center">
-            
-            
-            <RecordButton
-              onClick={() => {}} // No click during processing
-              disabled={true}
-              isRecording={false}
-              isProcessing={true}
-              processingProgress={processingProgress}
-            />
-            
-            <div className="mt-6 flex items-center justify-center space-x-2">
-              <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse"></div>
-              <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-              <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-              <span className="text-sm text-text-secondary ml-3">Analyzing audio fingerprint...</span>
-            </div>
-          </div>
+          <RecordingInterface
+            isRecording={false}
+            isProcessing={true}
+            recordingProgress={100}
+            processingProgress={processingProgress}
+            remainingTime={0}
+            onClick={() => {}} // No click during processing
+            disabled={true}
+          />
         );
 
       case 'result':
