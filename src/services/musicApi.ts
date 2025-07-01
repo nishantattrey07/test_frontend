@@ -79,7 +79,7 @@ export class MusicIdentificationAPI {
 
     try {
       // Make API request to get song metadata
-      const response = await fetch(`${API_BASE_URL}/api/song/${songId}`, {
+      const response = await fetch(`${API_BASE_URL}/song/${songId}`, {
         method: 'GET',
         headers: {
           'X-Client-ID': getClientId(),
