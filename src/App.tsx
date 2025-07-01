@@ -137,7 +137,7 @@ function App() {
         setAppState('error');
       }
     } catch (error) {
-      console.error('Recording error:', error);
+      // console.error('Recording error:', error);
       setErrorMessage('Recording failed. Please try again.');
       setAppState('error');
     }
@@ -161,7 +161,7 @@ function App() {
           title: 'Music Discovery',
           text: shareText,
           url: currentSong.shareableUrl || window.location.href
-        }).catch(console.error);
+        }).catch(err => {/* console.error(err) */});
       } else {
         // Fallback to clipboard
         navigator.clipboard.writeText(shareText).then(() => {

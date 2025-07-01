@@ -122,7 +122,7 @@ export const useAudioRecording = () => {
       });
       
     } catch (error) {
-      console.error('Error starting recording:', error);
+      // console.error('Error starting recording:', error);
       setIsRecording(false);
       return null;
     }

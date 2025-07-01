@@ -92,7 +92,7 @@ export class MusicIdentificationAPI {
         // Success response - transform SongMetadata to BackendMatchResponse format
         const metadata = await response.json();
         
-        console.log('✅ Song Metadata Response:', metadata); // For debugging
+        // console.log('✅ Song Metadata Response:', metadata); // For debugging
         
         // Create a mock BackendMatchResponse from SongMetadata
         const backendResponse: BackendMatchResponse = {
@@ -116,7 +116,7 @@ export class MusicIdentificationAPI {
         // Error response
         const errorResponse = await response.json();
         
-        console.log('❌ Song Metadata Error:', errorResponse); // For debugging
+        // console.log('❌ Song Metadata Error:', errorResponse); // For debugging
         
         return {
           success: false,
@@ -126,7 +126,7 @@ export class MusicIdentificationAPI {
       }
 
     } catch (error) {
-      console.error('🔴 Network Error:', error);
+      // console.error('🔴 Network Error:', error);
       
       return {
         success: false,
@@ -171,7 +171,7 @@ export class MusicIdentificationAPI {
         // Success response
         const backendResponse: BackendMatchResponse = await response.json();
         
-        console.log('✅ Backend Response:', backendResponse); // For debugging
+        // console.log('✅ Backend Response:', backendResponse); // For debugging
         
         const song = convertBackendResponseToSong(backendResponse);
         
@@ -184,7 +184,7 @@ export class MusicIdentificationAPI {
         // Error response
         const errorResponse: BackendErrorResponse = await response.json();
         
-        console.log('❌ Backend Error:', errorResponse); // For debugging
+        // console.log('❌ Backend Error:', errorResponse); // For debugging
         
         return {
           success: false,
@@ -194,7 +194,7 @@ export class MusicIdentificationAPI {
       }
 
     } catch (error) {
-      console.error('🔴 Network Error:', error);
+      // console.error('🔴 Network Error:', error);
       
       return {
         success: false,

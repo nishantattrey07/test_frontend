@@ -43,7 +43,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({ isActive }) => 
       analyserRef.current.fftSize = 256;
       source.connect(analyserRef.current);
     } catch (error) {
-      console.error('Error accessing microphone:', error);
+      // console.error('Error accessing microphone:', error);
     }
   };
 

@@ -43,7 +43,7 @@ class StorageService {
       
       localStorage.setItem(this.historyKey, JSON.stringify(trimmedHistory));
     } catch (error) {
-      console.error('Failed to save to history:', error);
+      // console.error('Failed to save to history:', error);
     }
   }
 
@@ -55,7 +55,7 @@ class StorageService {
       const history = JSON.parse(historyJson);
       return Array.isArray(history) ? history : [];
     } catch (error) {
-      console.error('Failed to load history:', error);
+      // console.error('Failed to load history:', error);
       return [];
     }
   }
@@ -64,7 +64,7 @@ class StorageService {
     try {
       localStorage.removeItem(this.historyKey);
     } catch (error) {
-      console.error('Failed to clear history:', error);
+      // console.error('Failed to clear history:', error);
     }
   }
 
@@ -73,7 +73,7 @@ class StorageService {
     try {
       localStorage.setItem('musicfind_preferences', JSON.stringify(preferences));
     } catch (error) {
-      console.error('Failed to save preferences:', error);
+      // console.error('Failed to save preferences:', error);
     }
   }
 
@@ -82,7 +82,7 @@ class StorageService {
       const prefs = localStorage.getItem('musicfind_preferences');
       return prefs ? JSON.parse(prefs) : {};
     } catch (error) {
-      console.error('Failed to load preferences:', error);
+      // console.error('Failed to load preferences:', error);
       return {};
     }
   }

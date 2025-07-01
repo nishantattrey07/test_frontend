@@ -66,7 +66,7 @@ export const SharedSongPage: React.FC = () => {
           title: 'Music Discovery',
           text: shareText,
           url: window.location.href
-        }).catch(console.error);
+        }).catch(err => {/* console.error(err) */});
       } else {
         // Fallback to clipboard
         navigator.clipboard.writeText(`${shareText} ${window.location.href}`).then(() => {

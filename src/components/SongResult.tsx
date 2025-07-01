@@ -22,7 +22,7 @@ export const SongResult: React.FC<SongResultProps> = ({
   // Auto-open YouTube Music when result appears (only once globally)
   useEffect(() => {
     if (song.youtubePlaybackUrl && !hasGlobalAutoOpened) {
-      console.log('🎵 Auto-opening YouTube Music for song:', song.title); // Debug log
+      // console.log('🎵 Auto-opening YouTube Music for song:', song.title); // Debug log
       window.open(song.youtubePlaybackUrl, '_blank');
       hasGlobalAutoOpened = true;
       

@@ -25,7 +25,7 @@ export const useMicToggle = () => {
       
       return true;
     } catch (error) {
-      console.log('Microphone permission denied or not available:', error);
+      // console.log('Microphone permission denied or not available:', error);
       setHasPermission(false);
       setIsMicEnabled(false);
       
