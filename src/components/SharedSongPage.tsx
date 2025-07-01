@@ -120,7 +120,6 @@ export const SharedSongPage: React.FC = () => {
               to="/"
               className="inline-flex items-center gap-2 bg-accent-start hover:bg-accent-glow text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105"
             >
-              <ArrowLeft size={18} />
               Discover Music
             </Link>
           </div>
