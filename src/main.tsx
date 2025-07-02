@@ -17,6 +17,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// just to make one more commit
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
