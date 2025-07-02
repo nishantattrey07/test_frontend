@@ -2,7 +2,7 @@ import React from 'react';
 import { Music, Zap } from 'lucide-react';
 
 interface RecordButtonProps {
-  onClick: () => void;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   disabled: boolean;
   isRecording: boolean;
   isProcessing?: boolean;
@@ -75,7 +75,7 @@ export const RecordButton: React.FC<RecordButtonProps> = ({
 
       {/* Main Button */}
       <button
-        onClick={onClick}
+        onClick={(event) => onClick(event)}
         disabled={disabled}
         className={`
           w-[min(280px,70vw)] h-[min(280px,70vw)] max-w-[280px] max-h-[280px]

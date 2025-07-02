@@ -23,6 +23,7 @@ function App() {
   const [canRecord, setCanRecord] = useState(true);
   const [timeUntilNextRequest, setTimeUntilNextRequest] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  const [userInteraction, setUserInteraction] = useState<Event | null>(null);
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
   const { toasts, showError, showInfo, removeToast } = useToast();
@@ -64,13 +65,18 @@ function App() {
     return () => clearInterval(interval);
   }, [appState]);
 
-  const handleStartRecording = useCallback(async () => {
+  const handleStartRecording = useCallback(async (event?: Event) => {
     if (!canRecord) return;
 
     // Check if microphone is enabled
     if (!isMicEnabled) {
       showError('Microphone is off. Please turn it on to search music.');
       return;
+    }
+
+    // Store the trusted user interaction for later use
+    if (event) {
+      setUserInteraction(event);
     }
 
     setAppState('recording');
@@ -150,6 +156,7 @@ function App() {
     setErrorMessage('');
     setRecordingProgress(0);
     setProcessingProgress(0);
+    setUserInteraction(null); // Clear the stored interaction
   }, [stopRecording]);
 
   const handleShare = useCallback(() => {
@@ -178,7 +185,7 @@ function App() {
         return (
           <div className="text-center">
             <RecordButton
-              onClick={handleStartRecording}
+              onClick={(event) => handleStartRecording(event)}
               disabled={!canRecord}
               isRecording={false}
             />
@@ -229,6 +236,7 @@ function App() {
             song={currentSong}
             onShare={handleShare}
             onTryAgain={handleReset}
+            userInteraction={userInteraction}
           />
         ) : null;
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Song } from '../types';
-import { Play, Share2, ExternalLink, Clock, Award, Music } from 'lucide-react';
+import { Play, Share2, ExternalLink, Clock, Award } from 'lucide-react';
 
 // Global flag to prevent multiple auto-opens
 let hasGlobalAutoOpened = false;
@@ -9,21 +9,62 @@ interface SongResultProps {
   song: Song;
   onShare: () => void;
   onTryAgain: () => void;
+  userInteraction?: Event | null;
 }
 
 export const SongResult: React.FC<SongResultProps> = ({ 
   song, 
   onShare, 
-  onTryAgain 
+  onTryAgain,
+  userInteraction 
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [autoOpenStatus, setAutoOpenStatus] = useState<'opening' | 'blocked' | 'success' | null>(null);
+
+  // Smart auto-open with popup blocking detection
+  const attemptAutoOpen = useCallback((url: string) => {
+    setAutoOpenStatus('opening');
+    
+    try {
+      const newWindow = window.open(url, '_blank');
+      
+      // Check if popup was blocked
+      if (!newWindow || newWindow.closed || newWindow.location.href === 'about:blank') {
+        // Popup was likely blocked
+        setAutoOpenStatus('blocked');
+        return false;
+      }
+      
+      // Additional check after a short delay
+      setTimeout(() => {
+        try {
+          if (newWindow.closed) {
+            setAutoOpenStatus('blocked');
+          } else {
+            setAutoOpenStatus('success');
+            // Hide success status after 3 seconds
+            setTimeout(() => setAutoOpenStatus(null), 3000);
+          }
+        } catch {
+          // Cross-origin error means window opened successfully
+          setAutoOpenStatus('success');
+          setTimeout(() => setAutoOpenStatus(null), 3000);
+        }
+      }, 250);
+      
+      return true;
+    } catch {
+      setAutoOpenStatus('blocked');
+      return false;
+    }
+  }, []);
 
   // Auto-open YouTube Music when result appears (only once globally)
   useEffect(() => {
-    if (song.youtubePlaybackUrl && !hasGlobalAutoOpened) {
-      // console.log('🎵 Auto-opening YouTube Music for song:', song.title); // Debug log
-      window.open(song.youtubePlaybackUrl, '_blank');
+    if (song.youtubePlaybackUrl && !hasGlobalAutoOpened && userInteraction) {
+      // Use the stored trusted interaction context
+      attemptAutoOpen(song.youtubePlaybackUrl);
       hasGlobalAutoOpened = true;
       
       // Reset the global flag after a short delay to allow for new searches
@@ -31,13 +72,13 @@ export const SongResult: React.FC<SongResultProps> = ({
         hasGlobalAutoOpened = false;
       }, 2000);
     }
-  }, [song.youtubePlaybackUrl, song.title]);
+  }, [song.youtubePlaybackUrl, song.title, userInteraction, attemptAutoOpen]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  // const formatTime = (seconds: number) => {
+  //   const mins = Math.floor(seconds / 60);
+  //   const secs = seconds % 60;
+  //   return `${mins}:${secs.toString().padStart(2, '0')}`;
+  // };
 
   const formatConfidence = (confidence: number) => {
     return Math.round(confidence * 100);
@@ -132,13 +173,43 @@ export const SongResult: React.FC<SongResultProps> = ({
             )}
           </div>
 
+          {/* Auto-open Status Feedback */}
+          {autoOpenStatus && (
+            <div className={`mb-4 p-3 rounded-xl flex items-center gap-2 text-sm transition-all duration-300 ${
+              autoOpenStatus === 'opening' ? 'bg-blue-500/20 text-blue-300' :
+              autoOpenStatus === 'blocked' ? 'bg-orange-500/20 text-orange-300' :
+              autoOpenStatus === 'success' ? 'bg-green-500/20 text-green-300' : ''
+            }`}>
+              {autoOpenStatus === 'opening' && (
+                <>
+                  <div className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin" />
+                  <span>Opening YouTube Music...</span>
+                </>
+              )}
+              {autoOpenStatus === 'blocked' && (
+                <>
+                  <ExternalLink size={16} />
+                  <span>Popup blocked! Use the play button below 👇</span>
+                </>
+              )}
+              {autoOpenStatus === 'success' && (
+                <>
+                  <Play size={16} />
+                  <span>Opened in YouTube Music! 🎵</span>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="space-y-3">
             {/* Primary Play Button */}
             {song.youtubePlaybackUrl && (
               <button
-                className="w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                onClick={() => window.open(song.youtubePlaybackUrl, '_blank')}
+                className={`w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200 ${
+                  autoOpenStatus === 'blocked' ? 'animate-pulse shadow-orange-500/50' : ''
+                }`}
+                onClick={() => attemptAutoOpen(song.youtubePlaybackUrl!)}
               >
                 <Play size={18} />
                 <span>Play on YouTube Music</span>
