@@ -10,6 +10,8 @@ import HistoryPanel from './components/HistoryPanel';
 import { useAudioRecording } from './hooks/useAudioRecording';
 import { useMicToggle } from './hooks/useMicToggle';
 import { useToast } from './hooks/useToast';
+import { usePWAInstall } from './hooks/usePWAInstall';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { musicAPI } from './services/musicApi';
 import { storageService } from './services/storageService';
 import { AppState, MatchResult, Song, MusicMatch } from './types';
@@ -27,6 +29,15 @@ function App() {
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
   const { toasts, showError, showInfo, removeToast } = useToast();
+  const {
+    canInstall,
+    isInstalled,
+    isInstalling,
+    showPrompt,
+    promptInstall,
+    dismissPrompt,
+    showInstallPrompt
+  } = usePWAInstall();
 
   // Update recording progress
   useEffect(() => {
@@ -64,6 +75,28 @@ function App() {
     const interval = setInterval(checkRateLimit, 1000);
     return () => clearInterval(interval);
   }, [appState]);
+
+  // Check for repeat users and show install prompt
+  useEffect(() => {
+    const checkRepeatUser = () => {
+      const history = storageService.getHistory();
+      const usageCount = parseInt(localStorage.getItem('soundwave_usage_count') || '0');
+      
+      // Increment usage count
+      localStorage.setItem('soundwave_usage_count', (usageCount + 1).toString());
+      
+      // Show install prompt after 3 uses or if user has history
+      if ((usageCount >= 2 || history.length >= 2) && canInstall && !isInstalled && appState === 'initial') {
+        setTimeout(() => {
+          showInstallPrompt();
+        }, 3000); // Wait 3 seconds before showing
+      }
+    };
+
+    if (appState === 'initial') {
+      checkRepeatUser();
+    }
+  }, [appState, canInstall, isInstalled, showInstallPrompt]);
 
   const handleStartRecording = useCallback(async (event?: Event) => {
     if (!canRecord) return;
@@ -328,6 +361,15 @@ function App() {
 
       {/* Toast Notifications */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+      {/* Global PWA Install Prompt */}
+      <PWAInstallPrompt
+        isVisible={showPrompt}
+        isInstalling={isInstalling}
+        onInstall={promptInstall}
+        onDismiss={dismissPrompt}
+        trigger="repeat-user"
+      />
     </div>
   );
 }

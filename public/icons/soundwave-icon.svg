@@ -1,0 +1,21 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="192" height="192" rx="40" fill="url(#gradient0_linear_1_1)"/>
+  
+  <!-- Sound wave icon -->
+  <path d="M96 64L72 88V96C72 100.418 75.5817 104 80 104H88C92.4183 104 96 100.418 96 96V64Z" fill="white"/>
+  <path d="M96 64L120 88V96C120 100.418 116.418 104 112 104H104C99.5817 104 96 100.418 96 96V64Z" fill="white"/>
+  <circle cx="96" cy="132" r="12" fill="white"/>
+  
+  <!-- Radio waves -->
+  <path d="M96 50C107.046 50 116 58.9543 116 70" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M96 35C115.33 35 131 50.67 131 70" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M96 50C84.954 50 76 58.9543 76 70" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M96 35C76.67 35 61 50.67 61 70" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+  
+  <defs>
+    <linearGradient id="gradient0_linear_1_1" x1="0" y1="0" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00d4aa"/>
+      <stop offset="100%" stop-color="#01a3ff"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -263,6 +263,18 @@ export const SongResult: React.FC<SongResultProps> = ({
       >
         Discover Another Track
       </button>
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt
+        isVisible={showInstallAfterBlock || showPrompt}
+        isInstalling={isInstalling}
+        onInstall={promptInstall}
+        onDismiss={() => {
+          setShowInstallAfterBlock(false);
+          dismissPrompt();
+        }}
+        trigger={showInstallAfterBlock ? 'popup-blocked' : 'general'}
+      />
     </div>
   );
 };
