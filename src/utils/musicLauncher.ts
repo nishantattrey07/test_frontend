@@ -40,10 +40,17 @@ export const prepareLaunchUrls = (song: Song): PreparedUrls => {
   const timestamp = song.offset || 0;
   const timestampParam = timestamp > 0 ? `&t=${Math.floor(timestamp)}s` : '';
   
-  // Pre-build all possible URLs
-  const iosUrl = `vnd.youtube://watch?v=${videoId}${timestampParam}`;
-  const androidUrl = `intent://watch?v=${videoId}${timestampParam}#Intent;scheme=vnd.youtube;package=com.google.android.apps.youtube.music;S.browser_fallback_url=${encodeURIComponent(song.youtubePlaybackUrl || '')};end`;
-  const webUrl = song.youtubePlaybackUrl || `https://music.youtube.com/watch?v=${videoId}${timestampParam}`;
+  // Pre-build all possible URLs with correct YouTube Music schemes
+  // iOS: Use youtubemusic:// scheme to open YouTube Music app directly
+  const iosUrl = `youtubemusic://watch?v=${videoId}${timestampParam}`;
+  
+  // Web: Always use music.youtube.com domain for YouTube Music
+  const youtubeMusicWebUrl = `https://music.youtube.com/watch?v=${videoId}${timestampParam}`;
+  
+  // Android: Use Intent with correct package name for YouTube Music app
+  const androidUrl = `intent://music.youtube.com/watch?v=${videoId}${timestampParam}#Intent;scheme=https;package=com.google.android.apps.youtube.music;S.browser_fallback_url=${encodeURIComponent(youtubeMusicWebUrl)};end`;
+  
+  const webUrl = youtubeMusicWebUrl;
   
   return {
     iosUrl,
@@ -113,11 +120,12 @@ export const launchYouTubeMusicWithOptions = (options: LaunchOptions): void => {
   // Build URLs on-demand (slower than pre-built)
   const timestampParam = timestamp && timestamp > 0 ? `&t=${Math.floor(timestamp)}s` : '';
   const finalVideoId = videoId || extractVideoId(webUrl || '');
+  const youtubeMusicWebUrl = `https://music.youtube.com/watch?v=${finalVideoId}${timestampParam}`;
   
   const preparedUrls: PreparedUrls = {
-    iosUrl: `vnd.youtube://watch?v=${finalVideoId}${timestampParam}`,
-    androidUrl: `intent://watch?v=${finalVideoId}${timestampParam}#Intent;scheme=vnd.youtube;package=com.google.android.apps.youtube.music;S.browser_fallback_url=${encodeURIComponent(webUrl || '')};end`,
-    webUrl: webUrl || `https://music.youtube.com/watch?v=${finalVideoId}${timestampParam}`,
+    iosUrl: `youtubemusic://watch?v=${finalVideoId}${timestampParam}`,
+    androidUrl: `intent://music.youtube.com/watch?v=${finalVideoId}${timestampParam}#Intent;scheme=https;package=com.google.android.apps.youtube.music;S.browser_fallback_url=${encodeURIComponent(youtubeMusicWebUrl)};end`,
+    webUrl: youtubeMusicWebUrl,
     videoId: finalVideoId
   };
   
