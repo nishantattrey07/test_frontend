@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Song } from '../types';
-import { Play, Share2, ExternalLink, Clock, Award, Music } from 'lucide-react';
-
-// Global flag to prevent multiple auto-opens
-let hasGlobalAutoOpened = false;
+import { Play, Share2, Clock, Award } from 'lucide-react';
+import { prepareLaunchUrls, launchYouTubeMusic, PreparedUrls } from '../utils/musicLauncher';
+import { useMediaSession } from '../hooks/useMediaSession';
 
 interface SongResultProps {
   song: Song;
@@ -18,30 +17,57 @@ export const SongResult: React.FC<SongResultProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [preparedUrls, setPreparedUrls] = useState<PreparedUrls | null>(null);
+  const hasAutoOpened = useRef(false);
 
-  // Auto-open YouTube Music when result appears (only once globally)
+  // Pre-build URLs immediately when song is received for zero-delay launching
   useEffect(() => {
-    if (song.youtubePlaybackUrl && !hasGlobalAutoOpened) {
-      // console.log('🎵 Auto-opening YouTube Music for song:', song.title); // Debug log
-      window.open(song.youtubePlaybackUrl, '_blank');
-      hasGlobalAutoOpened = true;
+    if (song) {
+      const urls = prepareLaunchUrls(song);
+      setPreparedUrls(urls);
+    }
+  }, [song]);
+
+  // Media Session hook with lazy setup
+  const { setupMediaSession, clearMediaSession } = useMediaSession(song, preparedUrls);
+
+  // Setup Media Session when song result appears (lazy loading)
+  useEffect(() => {
+    if (song && preparedUrls) {
+      setupMediaSession();
+    }
+    return () => {
+      clearMediaSession();
+    };
+  }, [song, preparedUrls, setupMediaSession, clearMediaSession]);
+
+  // High-performance auto-open with cached URLs
+  useEffect(() => {
+    if (song && preparedUrls && !hasAutoOpened.current) {
+      launchYouTubeMusic(preparedUrls);
+      hasAutoOpened.current = true;
       
-      // Reset the global flag after a short delay to allow for new searches
+      // Reset flag after delay to allow new searches
       setTimeout(() => {
-        hasGlobalAutoOpened = false;
+        hasAutoOpened.current = false;
       }, 2000);
     }
-  }, [song.youtubePlaybackUrl, song.title]);
+  }, [song, preparedUrls]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const formatConfidence = (confidence: number) => {
     return Math.round(confidence * 100);
   };
+
+  // Ultra-fast play button click using pre-built URLs
+  const handlePlayClick = useCallback(() => {
+    if (preparedUrls) {
+      launchYouTubeMusic(preparedUrls);
+    } else if (song.youtubePlaybackUrl) {
+      // Fallback for edge cases
+      window.open(song.youtubePlaybackUrl, '_blank');
+    }
+  }, [preparedUrls, song.youtubePlaybackUrl]);
 
   return (
     <div className="animate-slide-up w-full max-w-sm mx-auto">
@@ -135,10 +161,10 @@ export const SongResult: React.FC<SongResultProps> = ({
           {/* Action Buttons */}
           <div className="space-y-3">
             {/* Primary Play Button */}
-            {song.youtubePlaybackUrl && (
+            {(song.youtubePlaybackUrl || preparedUrls) && (
               <button
                 className="w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                onClick={() => window.open(song.youtubePlaybackUrl, '_blank')}
+                onClick={handlePlayClick}
               >
                 <Play size={18} />
                 <span>Play on YouTube Music</span>

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Play, Share2, Clock, Award, Music, Loader2 } from 'lucide-react';
 import { musicAPI } from '../services/musicApi';
 import { Song } from '../types';
+import { prepareLaunchUrls, launchYouTubeMusic, PreparedUrls } from '../utils/musicLauncher';
+import { useMediaSession } from '../hooks/useMediaSession';
 
 // Utility function to format seconds to MM:SS format
 const formatSecondsToTime = (seconds: number): string => {
@@ -21,6 +23,7 @@ export const SharedSongPage: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [preparedUrls, setPreparedUrls] = useState<PreparedUrls | null>(null);
 
   useEffect(() => {
     const fetchSongData = async () => {
@@ -53,9 +56,40 @@ export const SharedSongPage: React.FC = () => {
     fetchSongData();
   }, [songId, timestamp]);
 
+  // Pre-build URLs when song is loaded for zero-delay launching
+  useEffect(() => {
+    if (song) {
+      const urls = prepareLaunchUrls(song);
+      setPreparedUrls(urls);
+    }
+  }, [song]);
+
+  // Media Session hook with lazy setup
+  const { setupMediaSession, clearMediaSession } = useMediaSession(song, preparedUrls);
+
+  // Setup Media Session when song and URLs are ready
+  useEffect(() => {
+    if (song && preparedUrls && !loading) {
+      setupMediaSession();
+    }
+    return () => {
+      clearMediaSession();
+    };
+  }, [song, preparedUrls, loading, setupMediaSession, clearMediaSession]);
+
   const formatConfidence = (confidence: number) => {
     return Math.round(confidence * 100);
   };
+
+  // Ultra-fast play button click using pre-built URLs
+  const handlePlayClick = useCallback(() => {
+    if (preparedUrls) {
+      launchYouTubeMusic(preparedUrls);
+    } else if (song?.youtubePlaybackUrl) {
+      // Fallback for edge cases
+      window.open(song.youtubePlaybackUrl, '_blank');
+    }
+  }, [preparedUrls, song?.youtubePlaybackUrl]);
 
   const handleShare = () => {
     if (song) {
@@ -66,7 +100,7 @@ export const SharedSongPage: React.FC = () => {
           title: 'Music Discovery',
           text: shareText,
           url: window.location.href
-        }).catch(err => {/* console.error(err) */});
+        }).catch(() => {/* console.error(err) */});
       } else {
         // Fallback to clipboard
         navigator.clipboard.writeText(`${shareText} ${window.location.href}`).then(() => {
@@ -240,10 +274,10 @@ export const SharedSongPage: React.FC = () => {
               {/* Action Buttons */}
               <div className="space-y-3">
                 {/* Primary Play Button */}
-                {song.youtubePlaybackUrl && (
+                {(song.youtubePlaybackUrl || preparedUrls) && (
                   <button
                     className="w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                    onClick={() => window.open(song.youtubePlaybackUrl, '_blank')}
+                    onClick={handlePlayClick}
                   >
                     <Play size={18} />
                     <span>Play on YouTube Music{timestamp ? ` (${formatSecondsToTime(parseInt(timestamp))})` : ''}</span>

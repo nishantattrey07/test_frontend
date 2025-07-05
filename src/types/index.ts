@@ -93,3 +93,20 @@ export interface MusicMatch {
   youtubeUrl: string;
   spotifyUrl?: string;
 }
+
+// Performance launcher types
+export interface PreparedUrls {
+  iosUrl: string;
+  androidUrl: string;
+  webUrl: string;
+  videoId: string;
+}
+
+export interface PlatformInfo {
+  isIOS: boolean;
+  isAndroid: boolean;
+  isMobile: boolean;
+  isDesktop: boolean;
+  isPWA: boolean;
+  hasYouTubeMusicApp: boolean;
+}
