@@ -1,8 +1,9 @@
-import type { MusicMatch } from '../types';
+import type { MusicMatch, EarbudPreferences } from '../types';
 
 class StorageService {
   private readonly sessionKey = 'musicfind_session_uuid';
   private readonly historyKey = 'musicfind_history';
+  private readonly earbudPreferencesKey = 'musicfind_earbud_preferences';
   private readonly maxHistoryItems = 5;
 
   getSessionUUID(): string {
@@ -84,6 +85,50 @@ class StorageService {
     } catch (error) {
       // console.error('Failed to load preferences:', error);
       return {};
+    }
+  }
+
+  // Earbud preferences management
+  getEarbudPreferences(): EarbudPreferences {
+    try {
+      const prefs = localStorage.getItem(this.earbudPreferencesKey);
+      const parsed = prefs ? JSON.parse(prefs) : null;
+      
+      // Return default preferences if not found or invalid
+      const defaultPreferences: EarbudPreferences = {
+        enabled: true,
+        gesture: 'nexttrack',
+        tutorialShown: false
+      };
+      
+      return parsed ? { ...defaultPreferences, ...parsed } : defaultPreferences;
+    } catch {
+      // Return default preferences on error
+      return {
+        enabled: true,
+        gesture: 'nexttrack',
+        tutorialShown: false
+      };
+    }
+  }
+
+  saveEarbudPreferences(preferences: EarbudPreferences): void {
+    try {
+      const prefsToSave = {
+        ...preferences,
+        lastUsed: Date.now()
+      };
+      localStorage.setItem(this.earbudPreferencesKey, JSON.stringify(prefsToSave));
+    } catch {
+      // Silently fail if storage is not available
+    }
+  }
+
+  clearEarbudPreferences(): void {
+    try {
+      localStorage.removeItem(this.earbudPreferencesKey);
+    } catch {
+      // Silently fail if storage is not available
     }
   }
 }

@@ -1,4 +1,4 @@
-import { History, Radio } from 'lucide-react';
+import { History, Radio, Settings as SettingsIcon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ErrorCard } from './components/ErrorCard';
 import { RecordButton } from './components/RecordButton';
@@ -7,12 +7,16 @@ import { SongResult } from './components/SongResult';
 import { MicToggleButton } from './components/MicToggleButton';
 import { ToastContainer } from './components/ToastNotification';
 import HistoryPanel from './components/HistoryPanel';
+import { SettingsModal } from './components/Settings';
+import { EarbudTutorial } from './components/EarbudTutorial';
 import { useAudioRecording } from './hooks/useAudioRecording';
 import { useMicToggle } from './hooks/useMicToggle';
 import { useToast } from './hooks/useToast';
 import { musicAPI } from './services/musicApi';
 import { storageService } from './services/storageService';
-import { AppState, MatchResult, Song, MusicMatch } from './types';
+import { AppState, MatchResult, Song, MusicMatch, EarbudPreferences } from './types';
+import { useMediaSession } from './hooks/useMediaSession';
+import { prepareLaunchUrls, PreparedUrls } from './utils/musicLauncher';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('initial');
@@ -23,9 +27,50 @@ function App() {
   const [canRecord, setCanRecord] = useState(true);
   const [timeUntilNextRequest, setTimeUntilNextRequest] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showEarbudTutorial, setShowEarbudTutorial] = useState(false);
+  const [earbudPreferences, setEarbudPreferences] = useState<EarbudPreferences>();
+  const [preparedUrls, setPreparedUrls] = useState<PreparedUrls | null>(null);
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
   const { toasts, showError, showInfo, removeToast } = useToast();
+
+  // Load earbud preferences on app start
+  useEffect(() => {
+    const prefs = storageService.getEarbudPreferences();
+    setEarbudPreferences(prefs);
+  }, []);
+
+  // Pre-build URLs when song is identified
+  useEffect(() => {
+    if (currentSong) {
+      const urls = prepareLaunchUrls(currentSong);
+      setPreparedUrls(urls);
+    }
+  }, [currentSong]);
+
+  // Setup media session with earbud gesture support
+  const { setupMediaSession, clearMediaSession } = useMediaSession(
+    currentSong,
+    preparedUrls,
+    () => {
+      // Show earbud toast when triggered via gesture
+      showInfo('🎧 Searching for music...');
+      handleStartRecording();
+    },
+    appState,
+    earbudPreferences
+  );
+
+  // Setup media session immediately on app start
+  useEffect(() => {
+    if (earbudPreferences) {
+      setupMediaSession();
+    }
+    return () => {
+      clearMediaSession();
+    };
+  }, [earbudPreferences, setupMediaSession, clearMediaSession]);
 
   // Update recording progress
   useEffect(() => {
@@ -278,14 +323,24 @@ function App() {
             Premium Music Discovery
           </p>
           
-          {/* History Button - Top Right - Only show on main screen */}
+          {/* Header Buttons - Top Right - Only show on main screen */}
           {appState === 'initial' && (
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
-            >
-              <History className="w-5 h-5 text-white hover:text-accent-start transition-colors" />
-            </button>
+            <div className="absolute top-6 right-6 flex gap-2">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
+                title="Settings"
+              >
+                <SettingsIcon className="w-5 h-5 text-white hover:text-accent-start transition-colors" />
+              </button>
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
+                title="History"
+              >
+                <History className="w-5 h-5 text-white hover:text-accent-start transition-colors" />
+              </button>
+            </div>
           )}
         </header>
         
@@ -306,6 +361,32 @@ function App() {
       {/* History Panel */}
       {showHistory && (
         <HistoryPanel onClose={() => setShowHistory(false)} />
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          onShowTutorial={() => {
+            setShowSettings(false);
+            setShowEarbudTutorial(true);
+          }}
+        />
+      )}
+
+      {/* Earbud Tutorial Modal */}
+      {showEarbudTutorial && (
+        <EarbudTutorial
+          onClose={() => {
+            setShowEarbudTutorial(false);
+            // Mark tutorial as shown
+            if (earbudPreferences) {
+              const updatedPrefs = { ...earbudPreferences, tutorialShown: true };
+              setEarbudPreferences(updatedPrefs);
+              storageService.saveEarbudPreferences(updatedPrefs);
+            }
+          }}
+        />
       )}
 
       {/* Mic Toggle Button - Only show on main screen */}

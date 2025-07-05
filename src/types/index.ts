@@ -110,3 +110,11 @@ export interface PlatformInfo {
   isPWA: boolean;
   hasYouTubeMusicApp: boolean;
 }
+
+// Earbud gesture control types
+export interface EarbudPreferences {
+  enabled: boolean;
+  gesture: 'nexttrack';
+  tutorialShown?: boolean;
+  lastUsed?: number;
+}

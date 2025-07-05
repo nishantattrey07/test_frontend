@@ -2,7 +2,7 @@
 // Only initializes when song exists and avoids heavy operations
 
 import { useEffect, useState, useCallback } from 'react';
-import { Song } from '../types';
+import { Song, AppState, EarbudPreferences } from '../types';
 import { PreparedUrls, launchYouTubeMusic } from '../utils/musicLauncher';
 
 interface MediaSessionState {
@@ -20,12 +20,15 @@ interface UseMediaSessionResult {
 }
 
 /**
- * High-performance Media Session hook with lazy initialization
+ * High-performance Media Session hook with lazy initialization and earbud gesture support
  * Only sets up when explicitly called to avoid overhead during recording/processing
  */
 export const useMediaSession = (
   song: Song | null,
-  preparedUrls: PreparedUrls | null = null
+  preparedUrls: PreparedUrls | null = null,
+  onStartDiscovery?: () => void,
+  appState?: AppState,
+  earbudPreferences?: EarbudPreferences
 ): UseMediaSessionResult => {
   const [state, setState] = useState<MediaSessionState>({
     isSupported: 'mediaSession' in navigator,
@@ -71,13 +74,18 @@ export const useMediaSession = (
         setState(prev => ({ ...prev, isSetup: false }));
       });
 
-      // Optional: Add skip handlers for future enhancement
+      // Earbud gesture handler for music discovery
       navigator.mediaSession.setActionHandler('nexttrack', () => {
-        // Placeholder for future implementation
+        // Only trigger discovery when on initial screen and feature is enabled
+        if (appState === 'initial' && earbudPreferences?.enabled && onStartDiscovery) {
+          onStartDiscovery();
+        }
+        // For other states or when disabled, ignore the gesture
       });
 
       navigator.mediaSession.setActionHandler('previoustrack', () => {
-        // Placeholder for future implementation
+        // Reserved for future implementation
+        // Could be used for other earbud gestures
       });
 
       // Set initial playback state
@@ -90,7 +98,7 @@ export const useMediaSession = (
         error: err instanceof Error ? err.message : 'Failed to setup Media Session' 
       }));
     }
-  }, [song, preparedUrls, state.isSetup, state.isSupported]);
+  }, [song, preparedUrls, state.isSetup, state.isSupported, onStartDiscovery, appState, earbudPreferences]);
 
   // Clear Media Session
   const clearMediaSession = useCallback(() => {
@@ -153,9 +161,12 @@ export const useMediaSession = (
  */
 export const useAutoMediaSession = (
   song: Song | null,
-  preparedUrls: PreparedUrls | null = null
+  preparedUrls: PreparedUrls | null = null,
+  onStartDiscovery?: () => void,
+  appState?: AppState,
+  earbudPreferences?: EarbudPreferences
 ): UseMediaSessionResult => {
-  const result = useMediaSession(song, preparedUrls);
+  const result = useMediaSession(song, preparedUrls, onStartDiscovery, appState, earbudPreferences);
 
   // Auto-setup when song and preparedUrls are available
   useEffect(() => {
