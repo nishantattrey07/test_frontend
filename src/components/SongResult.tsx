@@ -114,23 +114,17 @@ export const SongResult: React.FC<SongResultProps> = ({
             )}
           </div>
 
-          {/* Stats */}
-          <div className="flex justify-center items-center gap-6 mb-6 text-sm">
-            <div className="flex items-center gap-1">
-              <Award size={16} className="text-success" />
-              <span className="text-text-primary font-medium">
-                {formatConfidence(song.confidence)}% Match
-              </span>
-            </div>
-            {song.offsetFormatted && (
+          {/* Timestamp only if available */}
+          {song.offsetFormatted && (
+            <div className="flex justify-center items-center mb-6 text-sm">
               <div className="flex items-center gap-1">
                 <Clock size={16} className="text-text-secondary" />
                 <span className="text-text-secondary">
                   at {song.offsetFormatted}
                 </span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -145,47 +139,52 @@ export const SongResult: React.FC<SongResultProps> = ({
               </button>
             )}
             
-            {/* Platform Buttons - Grid Layout */}
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-              {song.spotifyUrl && (
+            {/* Platform Buttons - Single Row Layout */}
+            {(song.spotifyUrl || song.appleMusicUrl) ? (
+              <div className="flex gap-2 sm:gap-3">
+                {song.spotifyUrl && (
+                  <button
+                    onClick={() => window.open(song.spotifyUrl, '_blank')}
+                    className="flex-1 bg-[#1DB954] hover:bg-[#1ed760] text-white font-medium py-3 px-2 sm:px-3 rounded-xl flex items-center justify-center gap-1 sm:gap-2 hover:scale-105 transition-all duration-200"
+                    title="Open in Spotify"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 17.568c-.227.378-.716.496-1.094.27-2.995-1.83-6.764-2.244-11.207-1.23-.45.105-.901-.225-1.006-.675-.105-.45.225-.901.675-1.006 4.875-1.112 9.066-.643 12.367 1.422.378.226.496.716.27 1.094l-.005.125zm1.568-3.482c-.285.473-.896.621-1.369.336-3.425-2.108-8.64-2.717-12.69-1.486-.533.162-1.097-.136-1.26-.669-.162-.533.136-1.097.669-1.26 4.653-1.413 10.451-.726 14.285 1.709.473.285.621.896.336 1.369l.029.001zm.137-3.629c-4.108-2.44-10.884-2.666-14.804-1.474-.64.195-1.316-.133-1.511-.773-.195-.64.133-1.316.773-1.511 4.492-1.367 12.04-1.104 16.731 1.704.573.342.761 1.08.418 1.653-.342.573-1.08.761-1.653.418l.046.003z"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm">Spotify</span>
+                  </button>
+                )}
+                
+                {song.appleMusicUrl && (
+                  <button
+                    onClick={() => window.open(song.appleMusicUrl, '_blank')}
+                    className="flex-1 bg-gradient-to-r from-[#FA243C] to-[#FF6B6B] text-white font-medium py-3 px-2 sm:px-3 rounded-xl flex items-center justify-center gap-1 sm:gap-2 hover:scale-105 transition-all duration-200"
+                    title="Open in Apple Music"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+                    </svg>
+                    <span className="text-xs sm:text-sm">Apple</span>
+                  </button>
+                )}
+                
                 <button
-                  onClick={() => window.open(song.spotifyUrl, '_blank')}
-                  className="bg-[#1DB954] hover:bg-[#1ed760] text-white font-medium py-3 px-3 sm:px-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-all duration-200"
-                  title="Open in Spotify"
+                  onClick={onShare}
+                  className="flex-1 bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-2 sm:px-3 rounded-xl flex items-center justify-center gap-1 sm:gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.568 17.568c-.227.378-.716.496-1.094.27-2.995-1.83-6.764-2.244-11.207-1.23-.45.105-.901-.225-1.006-.675-.105-.45.225-.901.675-1.006 4.875-1.112 9.066-.643 12.367 1.422.378.226.496.716.27 1.094l-.005.125zm1.568-3.482c-.285.473-.896.621-1.369.336-3.425-2.108-8.64-2.717-12.69-1.486-.533.162-1.097-.136-1.26-.669-.162-.533.136-1.097.669-1.26 4.653-1.413 10.451-.726 14.285 1.709.473.285.621.896.336 1.369l.029.001zm.137-3.629c-4.108-2.44-10.884-2.666-14.804-1.474-.64.195-1.316-.133-1.511-.773-.195-.64.133-1.316.773-1.511 4.492-1.367 12.04-1.104 16.731 1.704.573.342.761 1.08.418 1.653-.342.573-1.08.761-1.653.418l.046.003z"/>
-                  </svg>
-                  <span className="text-sm sm:text-base">Spotify</span>
+                  <Share2 size={16} />
+                  <span className="text-xs sm:text-sm">Share</span>
                 </button>
-              )}
-              
-              {song.appleMusicUrl && (
-                <button
-                  onClick={() => window.open(song.appleMusicUrl, '_blank')}
-                  className="bg-gradient-to-r from-[#FA243C] to-[#FF6B6B] text-white font-medium py-3 px-3 sm:px-4 rounded-xl flex items-center justify-center gap-2 hover:scale-105 transition-all duration-200"
-                  title="Open in Apple Music"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
-                  </svg>
-                  <span className="text-sm sm:text-base">Apple</span>
-                </button>
-              )}
-              
+              </div>
+            ) : (
               <button
                 onClick={onShare}
-                className={`${!song.spotifyUrl && !song.appleMusicUrl ? 'col-span-2' : ''} bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-3 sm:px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30`}
+                className="w-full bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30"
               >
-                <Share2 size={16} />
+                <Share2 size={18} />
                 <span className="text-sm sm:text-base">Share</span>
               </button>
-              
-              {/* Fill empty space if only one streaming service */}
-              {(song.spotifyUrl && !song.appleMusicUrl) || (!song.spotifyUrl && song.appleMusicUrl) ? (
-                <div className="hidden"></div>
-              ) : null}
-            </div>
+            )}
           </div>
         </div>
       </div>

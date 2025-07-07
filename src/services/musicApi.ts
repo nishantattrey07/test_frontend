@@ -50,6 +50,36 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse): So
   const roundedOffset = Math.round(offset_seconds);
   const shareableUrl = `${window.location.origin}/song/${metadata.song_id}?t=${roundedOffset}`;
   
+  // Convert YouTube URL to YouTube Music URL
+  const convertToYouTubeMusicUrl = (url: string | null): string | undefined => {
+    if (!url) return undefined;
+    
+    // If it's already a YouTube Music URL, return as is
+    if (url.includes('music.youtube.com')) {
+      return url;
+    }
+    
+    // Convert regular YouTube URL to YouTube Music URL
+    if (url.includes('youtube.com/watch') || url.includes('youtu.be/')) {
+      // Extract video ID
+      let videoId = '';
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split('?')[0];
+      } else if (url.includes('youtube.com/watch')) {
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        videoId = urlParams.get('v') || '';
+      }
+      
+      if (videoId) {
+        // Create YouTube Music URL
+        const timestampParam = offset_seconds > 0 ? `&t=${Math.round(offset_seconds)}s` : '';
+        return `https://music.youtube.com/watch?v=${videoId}${timestampParam}`;
+      }
+    }
+    
+    return url;
+  };
+  
   return {
     id: metadata.song_id.toString(),
     title: metadata.song_title,
@@ -62,7 +92,7 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse): So
     duration: metadata.duration_seconds || 0,
     popularity: metadata.track_popularity,
     youtubeUrl: metadata.youtube_url || undefined,
-    youtubePlaybackUrl: youtube_playback_url || undefined,
+    youtubePlaybackUrl: convertToYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url),
     shareableUrl: shareableUrl,
     spotifyUrl: metadata.spotify_url || undefined,
     appleMusicUrl: metadata.apple_music_url || undefined,
