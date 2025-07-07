@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Song } from '../types';
-import { Play, Share2, Clock } from 'lucide-react';
+import { Play, Clock } from 'lucide-react';
+import { EnhancedShareButton } from './EnhancedShareButton';
+import { SocialProofCounter } from './SocialProofCounter';
 
 // Global flag to prevent multiple auto-opens
 let hasGlobalAutoOpened = false;
 
 interface SongResultProps {
   song: Song;
-  onShare: () => void;
+  onShare?: () => void;
   onTryAgain: () => void;
+  onToast?: (message: string, type: 'success' | 'error') => void;
 }
 
 export const SongResult: React.FC<SongResultProps> = ({ 
   song, 
-  onShare, 
-  onTryAgain 
+  onTryAgain,
+  onToast 
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -126,6 +129,11 @@ export const SongResult: React.FC<SongResultProps> = ({
             </div>
           )}
 
+          {/* Social Proof */}
+          <div className="flex justify-center mb-4">
+            <SocialProofCounter song={song} variant="compact" />
+          </div>
+
           {/* Action Buttons */}
           <div className="space-y-3">
             {/* Primary Play Button */}
@@ -168,22 +176,17 @@ export const SongResult: React.FC<SongResultProps> = ({
                   </button>
                 )}
                 
-                <button
-                  onClick={onShare}
-                  className="flex-1 bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-2 sm:px-3 rounded-xl flex items-center justify-center gap-1 sm:gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30"
-                >
-                  <Share2 size={16} />
-                  <span className="text-xs sm:text-sm">Share</span>
-                </button>
+                <EnhancedShareButton 
+                  song={song} 
+                  onToast={onToast}
+                  compact
+                />
               </div>
             ) : (
-              <button
-                onClick={onShare}
-                className="w-full bg-primary-highlight/80 backdrop-blur-sm text-text-primary font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-primary-highlight hover:scale-105 transition-all duration-200 border border-primary-highlight/30"
-              >
-                <Share2 size={18} />
-                <span className="text-sm sm:text-base">Share</span>
-              </button>
+              <EnhancedShareButton 
+                song={song} 
+                onToast={onToast}
+              />
             )}
           </div>
         </div>

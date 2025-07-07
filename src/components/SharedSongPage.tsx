@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { musicAPI } from '../services/musicApi';
 import { Song } from '../types';
+import MetaTagsManager from '../utils/metaTags';
 
 // Utility function to format seconds to MM:SS format
 const formatSecondsToTime = (seconds: number): string => {
@@ -37,6 +38,15 @@ export const SharedSongPage: React.FC = () => {
         if (result.success && result.song) {
           // URLs are already built with timestamps in the API service
           setSong(result.song);
+          
+          // Update meta tags for social sharing
+          MetaTagsManager.updateForSong(result.song, {
+            url: window.location.href,
+            description: `🎵 Listen to "${result.song.title}" by ${result.song.artist}${timestamp ? ` starting at ${formatSecondsToTime(parseInt(timestamp))}` : ''}! Found with Syncify - discover music in seconds.`
+          });
+          
+          // Generate structured data for search engines
+          MetaTagsManager.generateStructuredData(result.song);
         } else {
           setError(result.error || 'Song not found');
         }
@@ -48,6 +58,11 @@ export const SharedSongPage: React.FC = () => {
     };
 
     fetchSongData();
+    
+    // Cleanup meta tags when component unmounts
+    return () => {
+      MetaTagsManager.reset();
+    };
   }, [songId, timestamp]);
 
   // const formatConfidence = (confidence: number) => {

@@ -7,6 +7,7 @@ import { MicToggleButton } from './components/MicToggleButton';
 import { RecordButton } from './components/RecordButton';
 import { RecordingInterface } from './components/RecordingInterface';
 import { SongResult } from './components/SongResult';
+import { SocialProofCounter } from './components/SocialProofCounter';
 import { ToastContainer } from './components/ToastNotification';
 import { useAudioRecording } from './hooks/useAudioRecording';
 import { useMicToggle } from './hooks/useMicToggle';
@@ -197,6 +198,11 @@ function App() {
                 Hold your device near the music source and tap the button to identify any song in seconds.
               </p>
             </div>
+            
+            {/* Social Proof */}
+            <div className="mt-6 flex justify-center">
+              <SocialProofCounter variant="minimal" />
+            </div>
           </div>
         );
 
@@ -232,6 +238,13 @@ function App() {
             song={currentSong}
             onShare={handleShare}
             onTryAgain={handleReset}
+            onToast={(message, type) => {
+              if (type === 'success') {
+                showInfo(message);
+              } else {
+                showError(message);
+              }
+            }}
           />
         ) : null;
 
