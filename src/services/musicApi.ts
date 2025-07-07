@@ -50,8 +50,19 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse): So
   const roundedOffset = Math.round(offset_seconds);
   const shareableUrl = `${window.location.origin}/song/${metadata.song_id}?t=${roundedOffset}`;
   
-  // Convert YouTube URL to YouTube Music URL
-  const convertToYouTubeMusicUrl = (url: string | null): string | undefined => {
+  // Extract video ID from YouTube URL
+  const extractVideoId = (url: string): string => {
+    if (url.includes('youtu.be/')) {
+      return url.split('youtu.be/')[1].split('?')[0];
+    } else if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(url.split('?')[1]);
+      return urlParams.get('v') || '';
+    }
+    return '';
+  };
+
+  // Build YouTube Music URL for manual "Play on YouTube Music" button clicks
+  const buildYouTubeMusicUrl = (url: string | null, offsetSeconds: number = 0): string | undefined => {
     if (!url) return undefined;
     
     // If it's already a YouTube Music URL, return as is
@@ -61,19 +72,41 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse): So
     
     // Convert regular YouTube URL to YouTube Music URL
     if (url.includes('youtube.com/watch') || url.includes('youtu.be/')) {
-      // Extract video ID
-      let videoId = '';
-      if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split('?')[0];
-      } else if (url.includes('youtube.com/watch')) {
-        const urlParams = new URLSearchParams(url.split('?')[1]);
-        videoId = urlParams.get('v') || '';
-      }
+      const videoId = extractVideoId(url);
       
       if (videoId) {
-        // Create YouTube Music URL
-        const timestampParam = offset_seconds > 0 ? `&t=${Math.round(offset_seconds)}s` : '';
+        // Create YouTube Music URL with timestamp
+        const timestampParam = offsetSeconds > 0 ? `&t=${Math.round(offsetSeconds)}s` : '';
         return `https://music.youtube.com/watch?v=${videoId}${timestampParam}`;
+      }
+    }
+    
+    return url;
+  };
+
+  // Build auto-opening URL optimized for browser opening
+  const buildAutoOpenUrl = (url: string | null, offsetSeconds: number = 0): string | undefined => {
+    if (!url) return undefined;
+    
+    // For auto-opening, we prefer regular YouTube URLs as they have better browser compatibility
+    // and are more likely to open successfully across different devices/browsers
+    
+    if (url.includes('youtube.com/watch') || url.includes('youtu.be/')) {
+      const videoId = extractVideoId(url);
+      
+      if (videoId) {
+        // Create regular YouTube URL with timestamp for better auto-opening compatibility
+        const timestampParam = offsetSeconds > 0 ? `&t=${Math.round(offsetSeconds)}s` : '';
+        return `https://www.youtube.com/watch?v=${videoId}${timestampParam}`;
+      }
+    }
+    
+    // If it's already a music.youtube.com URL, convert to regular YouTube for auto-opening
+    if (url.includes('music.youtube.com/watch')) {
+      const videoId = extractVideoId(url);
+      if (videoId) {
+        const timestampParam = offsetSeconds > 0 ? `&t=${Math.round(offsetSeconds)}s` : '';
+        return `https://www.youtube.com/watch?v=${videoId}${timestampParam}`;
       }
     }
     
@@ -92,7 +125,9 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse): So
     duration: metadata.duration_seconds || 0,
     popularity: metadata.track_popularity,
     youtubeUrl: metadata.youtube_url || undefined,
-    youtubePlaybackUrl: convertToYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url),
+    youtubeAutoOpenUrl: buildAutoOpenUrl(youtube_playback_url || metadata.youtube_url, offset_seconds),
+    youtubeMusicUrl: buildYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url, offset_seconds),
+    youtubePlaybackUrl: buildYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url, offset_seconds), // Backward compatibility
     shareableUrl: shareableUrl,
     spotifyUrl: metadata.spotify_url || undefined,
     appleMusicUrl: metadata.apple_music_url || undefined,

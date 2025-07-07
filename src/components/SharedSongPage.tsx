@@ -35,10 +35,7 @@ export const SharedSongPage: React.FC = () => {
         const result = await musicAPI.getSongMetadata(parseInt(songId));
         
         if (result.success && result.song) {
-          // Override the YouTube playback URL with timestamp if provided
-          if (timestamp && result.song.youtubeUrl) {
-            result.song.youtubePlaybackUrl = `${result.song.youtubeUrl}&t=${timestamp}s`;
-          }
+          // URLs are already built with timestamps in the API service
           setSong(result.song);
         } else {
           setError(result.error || 'Song not found');
@@ -234,10 +231,10 @@ export const SharedSongPage: React.FC = () => {
               {/* Action Buttons */}
               <div className="space-y-3">
                 {/* Primary Play Button */}
-                {song.youtubePlaybackUrl && (
+                {song.youtubeMusicUrl && (
                   <button
                     className="w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                    onClick={() => window.open(song.youtubePlaybackUrl, '_blank')}
+                    onClick={() => window.open(song.youtubeMusicUrl, '_blank')}
                   >
                     <Play size={18} />
                     <span>Play on YouTube Music{timestamp ? ` (${formatSecondsToTime(parseInt(timestamp))})` : ''}</span>

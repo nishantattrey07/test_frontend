@@ -52,8 +52,10 @@ export interface Song {
   popularity: number;
   spotifyUrl?: string;
   appleMusicUrl?: string;
-  youtubeUrl?: string; // YouTube Music URL
-  youtubePlaybackUrl?: string; // YouTube Music playback URL with timestamp
+  youtubeUrl?: string; // Original YouTube URL from backend
+  youtubeAutoOpenUrl?: string; // Regular YouTube URL optimized for auto-opening
+  youtubeMusicUrl?: string; // YouTube Music URL for manual "Play on YouTube Music" button
+  youtubePlaybackUrl?: string; // Deprecated: kept for backward compatibility
   shareableUrl?: string; // Shareable link to the song with timestamp
   artists?: Artist[]; // Full artist list
   genres?: string[];

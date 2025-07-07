@@ -19,11 +19,11 @@ export const SongResult: React.FC<SongResultProps> = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Auto-open YouTube Music when result appears (only once globally)
+  // Auto-open YouTube when result appears (only once globally)
   useEffect(() => {
-    if (song.youtubePlaybackUrl && !hasGlobalAutoOpened) {
-      // console.log('🎵 Auto-opening YouTube Music for song:', song.title); // Debug log
-      window.open(song.youtubePlaybackUrl, '_blank');
+    if (song.youtubeAutoOpenUrl && !hasGlobalAutoOpened) {
+      // console.log('🎵 Auto-opening YouTube for song:', song.title); // Debug log
+      window.open(song.youtubeAutoOpenUrl, '_blank');
       hasGlobalAutoOpened = true;
       
       // Reset the global flag after a short delay to allow for new searches
@@ -31,7 +31,7 @@ export const SongResult: React.FC<SongResultProps> = ({
         hasGlobalAutoOpened = false;
       }, 2000);
     }
-  }, [song.youtubePlaybackUrl, song.title]);
+  }, [song.youtubeAutoOpenUrl, song.title]);
 
   // const formatTime = (seconds: number) => {
   //   const mins = Math.floor(seconds / 60);
@@ -129,10 +129,10 @@ export const SongResult: React.FC<SongResultProps> = ({
           {/* Action Buttons */}
           <div className="space-y-3">
             {/* Primary Play Button */}
-            {song.youtubePlaybackUrl && (
+            {song.youtubeMusicUrl && (
               <button
                 className="w-full bg-gradient-to-r from-accent-start to-accent-end text-white font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg hover:scale-105 transition-all duration-200"
-                onClick={() => window.open(song.youtubePlaybackUrl, '_blank')}
+                onClick={() => window.open(song.youtubeMusicUrl, '_blank')}
               >
                 <Play size={18} />
                 <span className="text-sm sm:text-base">Play on YouTube Music</span>
