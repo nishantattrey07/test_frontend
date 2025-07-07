@@ -247,7 +247,7 @@ function App() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col"
+      className="min-h-screen w-full flex flex-col overflow-x-hidden"
       style={{
         background: `
           radial-gradient(circle at 20% 20%, rgba(0, 212, 170, 0.1), transparent 50%),
@@ -263,9 +263,9 @@ function App() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 flex flex-col">
+      <div className="relative z-10 flex-1 flex flex-col w-full max-w-full">
         {/* Modified Header with History Button */}
-        <header className="w-full p-6 text-center relative">
+        <header className="w-full p-4 sm:p-6 text-center relative">
           <div className="flex items-center justify-center gap-3 mb-2">
             <div className="p-2 rounded-xl bg-gradient-to-br from-accent-start to-accent-end">
               <Radio size={24} className="text-white" />
@@ -289,14 +289,14 @@ function App() {
           )}
         </header>
         
-        <main className="flex-1 flex items-center justify-center px-6 pb-12">
-          <div className="w-full max-w-md">
+        <main className="flex-1 flex items-center justify-center px-4 sm:px-6 pb-12">
+          <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl">
             {renderMainContent()}
           </div>
         </main>
 
         {/* Footer */}
-        <footer className="text-center pb-6 px-6">
+        <footer className="text-center pb-6 px-4 sm:px-6">
           <p className="text-text-secondary/60 text-xs">
             Audio processed and deleted immediately • Privacy protected
           </p>

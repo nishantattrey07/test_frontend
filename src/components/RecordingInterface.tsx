@@ -59,7 +59,7 @@ export const RecordingInterface: React.FC<RecordingInterfaceProps> = ({
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-[60vh]">
+    <div className="relative flex flex-col items-center justify-center min-h-[60vh] w-full max-w-full overflow-hidden">
       {/* Dynamic Header Messages */}
       <div className="text-center mb-8 z-20 relative">
         <h2 className="text-2xl font-bold text-white mb-2">
@@ -77,7 +77,7 @@ export const RecordingInterface: React.FC<RecordingInterfaceProps> = ({
       </div>
 
       {/* Main Recording Circle Container */}
-      <div className="relative w-80 h-80 flex items-center justify-center">
+      <div className="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 flex items-center justify-center max-w-full">
         
         {/* Expanding Ripple Effects - Pond-like circles */}
         {(isRecording || isProcessing) && (
@@ -157,7 +157,7 @@ export const RecordingInterface: React.FC<RecordingInterfaceProps> = ({
           onClick={onClick}
           disabled={disabled}
           className={`
-            relative w-56 h-56 rounded-full z-10
+            relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-full z-10
             transition-all duration-300 ease-out
             ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
             ${(isRecording || isProcessing) ? '' : 'animate-pulse-slow'}
@@ -184,20 +184,20 @@ export const RecordingInterface: React.FC<RecordingInterfaceProps> = ({
           <div className="relative z-10 flex flex-col items-center justify-center h-full text-text-primary">
             {isProcessing ? (
               <Zap 
-                size={48} 
+                size={typeof window !== 'undefined' && window.innerWidth < 640 ? 36 : 48} 
                 className="mb-3 text-accent-start animate-pulse"
               />
             ) : (
               <Music 
-                size={48} 
+                size={typeof window !== 'undefined' && window.innerWidth < 640 ? 36 : 48} 
                 className="mb-3"
               />
             )}
-            <span className="text-xl font-semibold">
+            <span className="text-lg sm:text-xl font-semibold text-center px-2">
               {isProcessing ? 'Processing' : isRecording ? 'Listening...' : 'Tap to Find'}
             </span>
             {isRecording && (
-              <span className="text-lg text-text-secondary mt-2">
+              <span className="text-base sm:text-lg text-text-secondary mt-2">
                 {remainingTime}
               </span>
             )}
