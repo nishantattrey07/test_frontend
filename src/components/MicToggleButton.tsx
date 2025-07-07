@@ -29,12 +29,12 @@ export const MicToggleButton: React.FC<MicToggleButtonProps> = ({
 
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
-      {/* Large Prominent Mic Button */}
+      {/* Optimally Sized Mic Button */}
       <button
         onClick={handleClick}
         disabled={isCheckingPermission}
         className={`
-          relative w-16 h-16 rounded-full
+          relative w-12 h-12 rounded-full
           transition-all duration-300 ease-out
           flex items-center justify-center
           ${isCheckingPermission 
@@ -45,27 +45,27 @@ export const MicToggleButton: React.FC<MicToggleButtonProps> = ({
             ? 'bg-gradient-to-r from-accent-start to-accent-end' 
             : 'bg-red-600'
           }
-          shadow-2xl border-2 border-white/20
+          shadow-xl border border-white/20
           touch-feedback
         `}
         style={{
           boxShadow: isMicEnabled 
-            ? '0 0 25px rgba(0, 212, 170, 0.5), 0 0 50px rgba(0, 212, 170, 0.2)' 
-            : '0 0 25px rgba(220, 38, 38, 0.5), 0 0 50px rgba(220, 38, 38, 0.2)'
+            ? '0 0 20px rgba(0, 212, 170, 0.4), 0 0 35px rgba(0, 212, 170, 0.15)' 
+            : '0 0 20px rgba(220, 38, 38, 0.4), 0 0 35px rgba(220, 38, 38, 0.15)'
         }}
       >
-        {/* Large Mic Icon */}
+        {/* Proportional Mic Icon */}
         {isCheckingPermission ? (
-          <Loader2 className="w-8 h-8 text-white animate-spin" />
+          <Loader2 className="w-5 h-5 text-white animate-spin" />
         ) : isMicEnabled ? (
-          <Mic className="w-8 h-8 text-white" />
+          <Mic className="w-5 h-5 text-white" />
         ) : (
-          <MicOff className="w-8 h-8 text-white" />
+          <MicOff className="w-5 h-5 text-white" />
         )}
         
-        {/* Pulse Animation for Active State */}
+        {/* Subtle Pulse Animation for Active State */}
         {isMicEnabled && !isCheckingPermission && (
-          <div className="absolute inset-0 rounded-full bg-accent-start/30 animate-ping"></div>
+          <div className="absolute inset-0 rounded-full bg-accent-start/25 animate-ping"></div>
         )}
       </button>
       
