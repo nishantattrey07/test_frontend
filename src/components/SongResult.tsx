@@ -179,7 +179,6 @@ export const SongResult: React.FC<SongResultProps> = ({
                 <EnhancedShareButton 
                   song={song} 
                   onToast={onToast}
-                  compact
                 />
               </div>
             ) : (

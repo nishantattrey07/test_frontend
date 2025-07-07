@@ -125,15 +125,51 @@ export class StorySharing {
   static async shareToWhatsAppStatus(imageUrl: string, song: Song): Promise<ShareResult> {
     try {
       const shareText = this.generateShareText(song, { shareType: 'discovery' });
-      const encodedText = encodeURIComponent(shareText);
       
       // Check if mobile device
       const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (imageUrl && navigator.share && 'canShare' in navigator) {
+        // Try native sharing with image
+        try {
+          const response = await fetch(imageUrl);
+          const blob = await response.blob();
+          const file = new File([blob], `${song.title}-story.png`, { type: 'image/png' });
+          
+          const shareData = {
+            title: `${song.title} by ${song.artist}`,
+            text: shareText,
+            files: [file]
+          };
+          
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            return {
+              success: true,
+              platform: 'whatsapp-native'
+            };
+          }
+        } catch {
+          // Fall through to text-only sharing
+        }
+      }
+      
+      // Fallback to text-only sharing
+      const encodedText = encodeURIComponent(shareText);
       
       if (isMobile) {
         // WhatsApp URL scheme
         const whatsappUrl = `whatsapp://send?text=${encodedText}`;
         window.open(whatsappUrl, '_blank');
+        
+        // Also try to copy image to clipboard for manual sharing
+        if (imageUrl) {
+          try {
+            await this.copyImageToClipboard(imageUrl);
+          } catch {
+            // Ignore clipboard errors
+          }
+        }
         
         return {
           success: true,

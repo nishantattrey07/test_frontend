@@ -26,16 +26,18 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
   };
 
   const handleShare = async (platform: string, shareType: 'discovery' | 'challenge' | 'flex' | 'recommendation' = 'discovery') => {
+    console.log('🔥 Enhanced Share clicked:', { platform, shareType, hasCard: !!storyCardUrl });
     try {
       let result;
       
       switch (platform) {
         case 'instagram':
           if (!storyCardUrl) {
+            console.log('⚠️ No story card available, generating...');
             setIsGeneratingCard(true);
             return;
           }
-          result = await StorySharing.shareToInstagramStories(storyCardUrl, song);
+          result = await StorySharing.shareToInstagramStories(storyCardUrl);
           break;
           
         case 'whatsapp':
@@ -159,9 +161,8 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
 
   // Generate card when component mounts
   useEffect(() => {
-    if (!storyCardUrl) {
-      setIsGeneratingCard(true);
-    }
+    console.log('🚀 EnhancedShareButton mounted, starting card generation');
+    setIsGeneratingCard(true);
   }, []);
 
   // Generate card when variant changes
@@ -196,16 +197,20 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
       )}
       
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          console.log('🚀 Share button clicked, current state:', { isOpen, storyCardUrl, isGeneratingCard });
+          setIsOpen(!isOpen);
+        }}
         className="flex items-center gap-2 px-4 py-2 bg-accent-start/20 hover:bg-accent-start/30 text-accent-start rounded-xl transition-all duration-200 hover:scale-105"
       >
         <Share2 size={18} />
         <span>Share</span>
+        {isGeneratingCard && <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse ml-1"></div>}
       </button>
 
       {/* Enhanced Share Menu */}
       {isOpen && (
-        <div className="absolute bottom-full left-0 mb-2 w-80 bg-primary-dark/95 backdrop-blur-sm border border-primary-highlight/30 rounded-2xl shadow-xl z-50 overflow-hidden">
+        <div className="fixed inset-x-4 bottom-4 max-w-sm mx-auto md:absolute md:bottom-full md:left-0 md:mb-2 md:inset-x-auto md:max-w-none w-full md:w-80 bg-primary-dark/95 backdrop-blur-sm border border-primary-highlight/30 rounded-2xl shadow-xl z-50 overflow-hidden">
           {/* Header */}
           <div className="p-4 border-b border-primary-highlight/20">
             <h3 className="text-lg font-semibold text-text-primary mb-1">Share Your Discovery</h3>
