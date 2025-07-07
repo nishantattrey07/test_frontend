@@ -1,18 +1,19 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { History, Radio } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ErrorCard } from './components/ErrorCard';
+import HistoryPanel from './components/HistoryPanel';
+import { MicToggleButton } from './components/MicToggleButton';
 import { RecordButton } from './components/RecordButton';
 import { RecordingInterface } from './components/RecordingInterface';
 import { SongResult } from './components/SongResult';
-import { MicToggleButton } from './components/MicToggleButton';
 import { ToastContainer } from './components/ToastNotification';
-import HistoryPanel from './components/HistoryPanel';
 import { useAudioRecording } from './hooks/useAudioRecording';
 import { useMicToggle } from './hooks/useMicToggle';
 import { useToast } from './hooks/useToast';
 import { musicAPI } from './services/musicApi';
 import { storageService } from './services/storageService';
-import { AppState, MatchResult, Song, MusicMatch } from './types';
+import { AppState, MatchResult, MusicMatch, Song } from './types';
 
 function App() {
   const [appState, setAppState] = useState<AppState>('initial');
@@ -155,13 +156,14 @@ function App() {
 
   const handleShare = useCallback(() => {
     if (currentSong) {
-      const shareText = `🎵 Just discovered "${currentSong.title}" by ${currentSong.artist} at ${currentSong.offsetFormatted} using SoundWave! Listen: ${currentSong.shareableUrl} #MusicDiscovery`;
+      const shareText = `🔥 Just landed on "${currentSong.title}" by ${currentSong.artist} at ${currentSong.offsetFormatted} with Syncify! Tap to hear the exact moment I love: ${currentSong.shareableUrl} #SyncYourSound`;
       
       if (navigator.share) {
         navigator.share({
-          title: 'Music Discovery',
+          title: 'Syncify',
           text: shareText,
           url: currentSong.shareableUrl || window.location.href
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         }).catch(err => {/* console.error(err) */});
       } else {
         // Fallback to clipboard
@@ -272,11 +274,11 @@ function App() {
               <Radio size={24} className="text-white" />
             </div>
             <h1 className="text-2xl font-bold text-text-primary">
-              SoundWave
+              Syncify
             </h1>
           </div>
           <p className="text-text-secondary text-sm">
-            Premium Music Discovery
+            Perfect Sync, Every Time
           </p>
           
           {/* History Button - Top Right - Only show on main screen */}

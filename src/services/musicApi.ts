@@ -1,4 +1,4 @@
-import { MatchResult, Song, BackendMatchResponse, BackendErrorResponse } from '../types';
+import { BackendErrorResponse, BackendMatchResponse, MatchResult, Song } from '../types';
 
 // Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -6,10 +6,10 @@ const REQUEST_COOLDOWN = 10000; // 10 seconds (matches backend rate limiting)
 
 // Generate a unique client ID for user tracking (stored in localStorage)
 const getClientId = (): string => {
-  let clientId = localStorage.getItem('soundwave_client_id');
+  let clientId = localStorage.getItem('Syncify_client_id');
   if (!clientId) {
     clientId = 'client_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-    localStorage.setItem('soundwave_client_id', clientId);
+    localStorage.setItem('Syncify_client_id', clientId);
   }
   return clientId;
 };

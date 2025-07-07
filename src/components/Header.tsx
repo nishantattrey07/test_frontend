@@ -1,5 +1,5 @@
-import React from 'react';
 import { Radio } from 'lucide-react';
+import React from 'react';
 
 export const Header: React.FC = () => {
   return (
@@ -9,11 +9,11 @@ export const Header: React.FC = () => {
           <Radio size={24} className="text-white" />
         </div>
         <h1 className="text-2xl font-bold text-text-primary">
-          SoundWave
+          Syncify
         </h1>
       </div>
       <p className="text-text-secondary text-sm">
-        Premium Music Discovery
+        Perfect Sync, Every Time
       </p>
     </header>
   );

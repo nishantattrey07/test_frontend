@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Song } from '../types';
-import { Play, Share2, Clock, Award } from 'lucide-react';
+import { Play, Share2, Clock } from 'lucide-react';
 
 // Global flag to prevent multiple auto-opens
 let hasGlobalAutoOpened = false;
@@ -39,9 +39,9 @@ export const SongResult: React.FC<SongResultProps> = ({
   //   return `${mins}:${secs.toString().padStart(2, '0')}`;
   // };
 
-  const formatConfidence = (confidence: number) => {
-    return Math.round(confidence * 100);
-  };
+  // const formatConfidence = (confidence: number) => {
+  //   return Math.round(confidence * 100);
+  // };
 
   return (
     <div className="animate-slide-up w-full max-w-sm sm:max-w-md lg:max-w-lg mx-auto px-2 sm:px-0">

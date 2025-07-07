@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { Play, Share2, Clock, Award, Music, Loader2 } from 'lucide-react';
+import { Clock, Loader2, Music, Play, Share2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { musicAPI } from '../services/musicApi';
 import { Song } from '../types';
 
@@ -50,19 +50,20 @@ export const SharedSongPage: React.FC = () => {
     fetchSongData();
   }, [songId, timestamp]);
 
-  const formatConfidence = (confidence: number) => {
-    return Math.round(confidence * 100);
-  };
+  // const formatConfidence = (confidence: number) => {
+  //   return Math.round(confidence * 100);
+  // };
 
   const handleShare = () => {
     if (song) {
-      const shareText = `🎵 Check out "${song.title}" by ${song.artist}${timestamp ? ` at ${formatSecondsToTime(parseInt(timestamp))}` : ''} on SoundWave! #MusicDiscovery`;
+      const shareText = `🎵 I'm jumping into "${song.title}" by ${song.artist}${timestamp ? ` right at ${formatSecondsToTime(parseInt(timestamp))}` : ''}! Found it with Syncify—instantly sync to your favorite part. 🎧`;
       
       if (navigator.share) {
         navigator.share({
-          title: 'Music Discovery',
+          title: 'Syncify',
           text: shareText,
           url: window.location.href
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         }).catch(err => {/* console.error(err) */});
       } else {
         // Fallback to clipboard
@@ -305,7 +306,7 @@ export const SharedSongPage: React.FC = () => {
       {/* Footer */}
       <footer className="relative z-10 text-center pb-6 px-6">
         <p className="text-text-secondary/60 text-xs">
-          Powered by SoundWave • Premium Music Discovery
+          Powered by Syncify • Perfect Sync, Every Time
         </p>
       </footer>
     </div>
