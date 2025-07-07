@@ -10,8 +10,10 @@ interface HistoryPanelProps {
 const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
   const history = storageService.getHistory();
 
-  const handleOpenYouTube = (url: string) => {
-    window.open(url, '_blank');
+  const handleOpenMusic = (match: MusicMatch) => {
+    // Use YouTube Music URL for direct playback, fallback to regular YouTube URL
+    const musicUrl = match.youtubeMusicUrl || match.youtubeUrl;
+    window.open(musicUrl, '_blank');
   };
 
   const formatDate = (timestamp: number) => {
@@ -57,7 +59,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
               {history.map((match, index) => (
                 <div
                   key={`${match.id}-${index}`}
-                  className="glass-card p-4 hover:bg-white/10 transition-all duration-300 group animate-scale-in"
+                  onClick={() => handleOpenMusic(match)}
+                  className="glass-card p-4 hover:bg-white/10 active:bg-white/20 transition-all duration-200 group animate-scale-in cursor-pointer touch-feedback"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center space-x-4">
@@ -97,13 +100,10 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
                       </div>
                     </div>
 
-                    {/* Enhanced Actions */}
-                    <button
-                      onClick={() => handleOpenYouTube(match.youtubeUrl)}
-                      className="glass-card p-2 hover:bg-white/20 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95"
-                    >
-                      <ExternalLink className="w-4 h-4 text-text-secondary hover:text-accent-start transition-colors" />
-                    </button>
+                    {/* Visual Indicator for Clickable Card */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <div className="w-2 h-2 bg-accent-start rounded-full animate-pulse"></div>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -215,3 +215,38 @@
     transform: scale(1.02);
   }
 }
+
+/* Responsive Design Utilities */
+@media (max-width: 640px) {
+  .glass-card {
+    @apply p-3;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
+/* Prevent horizontal scrolling on all devices */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Ensure all containers respect viewport width */
+* {
+  box-sizing: border-box;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .touch-feedback:active {
+    transform: scale(0.98);
+  }
+  
+  /* Optimize button tap targets for mobile */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
