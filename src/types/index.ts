@@ -92,6 +92,7 @@ export interface MusicMatch {
   albumArt?: string;
   confidence: number;
   timestamp: number;
-  youtubeUrl: string;
+  youtubeUrl: string; // Original YouTube URL for backward compatibility
+  youtubeMusicUrl?: string; // Direct YouTube Music URL for single-click playback
   spotifyUrl?: string;
 }

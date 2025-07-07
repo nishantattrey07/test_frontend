@@ -10,8 +10,10 @@ interface HistoryPanelProps {
 const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
   const history = storageService.getHistory();
 
-  const handleOpenYouTube = (url: string) => {
-    window.open(url, '_blank');
+  const handleOpenMusic = (match: MusicMatch) => {
+    // Use YouTube Music URL for direct playback, fallback to regular YouTube URL
+    const musicUrl = match.youtubeMusicUrl || match.youtubeUrl;
+    window.open(musicUrl, '_blank');
   };
 
   const formatDate = (timestamp: number) => {
@@ -99,7 +101,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
 
                     {/* Enhanced Actions */}
                     <button
-                      onClick={() => handleOpenYouTube(match.youtubeUrl)}
+                      onClick={() => handleOpenMusic(match)}
                       className="glass-card p-2 hover:bg-white/20 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110 active:scale-95"
                     >
                       <ExternalLink className="w-4 h-4 text-text-secondary hover:text-accent-start transition-colors" />

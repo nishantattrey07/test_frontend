@@ -115,6 +115,7 @@ function App() {
             confidence: result.song.confidence * 100, // Convert to percentage
             timestamp: Date.now(),
             youtubeUrl: result.song.youtubeUrl || '#',
+            youtubeMusicUrl: result.song.youtubeMusicUrl, // Direct YouTube Music URL for single-click access
             spotifyUrl: result.song.spotifyUrl,
           };
           
