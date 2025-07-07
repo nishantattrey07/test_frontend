@@ -91,19 +91,19 @@ export const EnhancedShareButton: React.FC<EnhancedShareButtonProps> = ({
   const getSuccessMessage = (platform: string): string => {
     switch (platform) {
       case 'instagram':
-        return 'Opening Instagram Stories...';
+        return '🎪 Opening Instagram Stories! Your story card is ready to post!';
       case 'whatsapp':
-        return 'Opening WhatsApp...';
+        return '💬 Opening WhatsApp! Story card copied to clipboard for easy sharing!';
       case 'twitter':
-        return 'Opening Twitter...';
+        return '🐦 Opening Twitter! Ready to go viral!';
       case 'download':
-        return 'Story card downloaded!';
+        return '📱 Story card downloaded! Perfect for posting anywhere!';
       case 'copy':
-        return 'Copied to clipboard!';
+        return '📋 Story card copied! Ready to paste in any app!';
       case 'native':
-        return 'Opening share menu...';
+        return '🚀 Opening share menu with your viral story card!';
       default:
-        return 'Shared successfully!';
+        return '🎉 Story shared successfully!';
     }
   };
 
