@@ -1,4 +1,4 @@
-import type { MusicMatch } from '../types';
+import type { MusicMatch, UserPreferences } from '../types';
 
 class StorageService {
   private readonly sessionKey = 'musicfind_session_uuid';
@@ -69,7 +69,7 @@ class StorageService {
   }
 
   // Analytics and preferences
-  updateUserPreferences(preferences: Record<string, any>): void {
+  updateUserPreferences(preferences: UserPreferences): void {
     try {
       localStorage.setItem('musicfind_preferences', JSON.stringify(preferences));
     } catch (error) {
@@ -77,14 +77,25 @@ class StorageService {
     }
   }
 
-  getUserPreferences(): Record<string, any> {
+  getUserPreferences(): UserPreferences {
     try {
       const prefs = localStorage.getItem('musicfind_preferences');
-      return prefs ? JSON.parse(prefs) : {};
+      return prefs ? JSON.parse(prefs) : { syncMode: false };
     } catch (error) {
       // console.error('Failed to load preferences:', error);
-      return {};
+      return { syncMode: false };
     }
+  }
+
+  // Sync mode specific methods
+  getSyncMode(): boolean {
+    const prefs = this.getUserPreferences();
+    return prefs.syncMode || false;
+  }
+
+  setSyncMode(enabled: boolean): void {
+    const prefs = this.getUserPreferences();
+    this.updateUserPreferences({ ...prefs, syncMode: enabled });
   }
 }
 

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { History, Radio } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { ErrorCard } from './components/ErrorCard';
+import { Header } from './components/Header';
 import HistoryPanel from './components/HistoryPanel';
 import { MicToggleButton } from './components/MicToggleButton';
 import { RecordButton } from './components/RecordButton';
@@ -10,6 +9,7 @@ import { SongResult } from './components/SongResult';
 import { ToastContainer } from './components/ToastNotification';
 import { useAudioRecording } from './hooks/useAudioRecording';
 import { useMicToggle } from './hooks/useMicToggle';
+import { useSyncMode } from './hooks/useSyncMode';
 import { useToast } from './hooks/useToast';
 import { musicAPI } from './services/musicApi';
 import { storageService } from './services/storageService';
@@ -26,6 +26,7 @@ function App() {
   const [showHistory, setShowHistory] = useState(false);
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
+  const { syncMode } = useSyncMode();
   const { toasts, showError, showInfo, removeToast } = useToast();
 
   // Update recording progress
@@ -101,7 +102,7 @@ function App() {
         updateProcessingProgress();
         
         // Identify the music
-        const result: MatchResult = await musicAPI.identifyMusic(audioBlob);
+        const result: MatchResult = await musicAPI.identifyMusic(audioBlob, syncMode);
         
         setProcessingProgress(100);
         
@@ -143,7 +144,7 @@ function App() {
       setErrorMessage('Recording failed. Please try again.');
       setAppState('error');
     }
-  }, [canRecord, startRecording, isMicEnabled, showError]);
+  }, [canRecord, startRecording, isMicEnabled, showError, syncMode]);
 
   const handleReset = useCallback(() => {
     stopRecording();
@@ -267,30 +268,12 @@ function App() {
 
       {/* Content */}
       <div className="relative z-10 flex-1 flex flex-col w-full max-w-full">
-        {/* Modified Header with History Button */}
-        <header className="w-full p-4 sm:p-6 text-center relative">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-accent-start to-accent-end">
-              <Radio size={24} className="text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-text-primary">
-              Syncify
-            </h1>
-          </div>
-          <p className="text-text-secondary text-sm">
-            Perfect Sync, Every Time
-          </p>
-          
-          {/* History Button - Top Right - Only show on main screen */}
-          {appState === 'initial' && (
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm border border-white/10"
-            >
-              <History className="w-5 h-5 text-white hover:text-accent-start transition-colors" />
-            </button>
-          )}
-        </header>
+        {/* Header with integrated controls */}
+        <Header 
+          showHistoryButton={appState === 'initial'}
+          showSyncToggle={appState === 'initial'}
+          onHistoryClick={() => setShowHistory(!showHistory)}
+        />
         
         <main className="flex-1 flex items-center justify-center px-4 sm:px-6 pb-12">
           <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg xl:max-w-xl">

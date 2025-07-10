@@ -96,3 +96,9 @@ export interface MusicMatch {
   youtubeMusicUrl?: string; // Direct YouTube Music URL for single-click playback
   spotifyUrl?: string;
 }
+
+// User preferences types
+export interface UserPreferences {
+  syncMode: boolean;
+  [key: string]: string | number | boolean;
+}
