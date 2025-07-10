@@ -24,6 +24,11 @@ function App() {
   const [canRecord, setCanRecord] = useState(true);
   const [timeUntilNextRequest, setTimeUntilNextRequest] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  // Timer state for sync mode
+  const [timerA, setTimerA] = useState<number>(0); // Main timer: button press to response
+  const [timerB, setTimerB] = useState<number>(0); // UI timer: response to result display
+  const [timerAStart, setTimerAStart] = useState<number>(0);
+  const [timerBStart, setTimerBStart] = useState<number>(0);
   const { isRecording, startRecording, stopRecording } = useAudioRecording();
   const { isMicEnabled, isCheckingPermission, toggleMic } = useMicToggle();
   const { syncMode } = useSyncMode();
@@ -66,6 +71,18 @@ function App() {
     return () => clearInterval(interval);
   }, [appState]);
 
+  // Timer B completion - when result page is displayed
+  useEffect(() => {
+    if (appState === 'result' && timerBStart > 0) {
+      const timerBEndTime = Date.now();
+      const timerBDuration = (timerBEndTime - timerBStart) / 1000;
+      setTimerB(timerBDuration);
+      
+      // Reset timer B start for next use
+      setTimerBStart(0);
+    }
+  }, [appState, timerBStart]);
+
   const handleStartRecording = useCallback(async () => {
     if (!canRecord) return;
 
@@ -74,6 +91,10 @@ function App() {
       showError('Microphone is off. Please turn it on to search music.');
       return;
     }
+
+    // Start Timer A - Main sync timer
+    const timerAStartTime = Date.now();
+    setTimerAStart(timerAStartTime);
 
     setAppState('recording');
     setRecordingProgress(0);
@@ -101,8 +122,17 @@ function App() {
         
         updateProcessingProgress();
         
-        // Identify the music
-        const result: MatchResult = await musicAPI.identifyMusic(audioBlob, syncMode);
+        // Stop Timer A first to get the duration
+        const timerAEndTime = Date.now();
+        const timerADuration = (timerAEndTime - timerAStartTime) / 1000; // Convert to seconds
+        setTimerA(timerADuration);
+
+        // Identify the music with Timer A duration
+        const result: MatchResult = await musicAPI.identifyMusic(audioBlob, syncMode, timerADuration);
+        
+        // Start Timer B - UI render timer
+        const timerBStartTime = Date.now();
+        setTimerBStart(timerBStartTime);
         
         setProcessingProgress(100);
         
@@ -144,7 +174,7 @@ function App() {
       setErrorMessage('Recording failed. Please try again.');
       setAppState('error');
     }
-  }, [canRecord, startRecording, isMicEnabled, showError, syncMode]);
+  }, [canRecord, startRecording, isMicEnabled, showError, syncMode, timerAStart]);
 
   const handleReset = useCallback(() => {
     stopRecording();

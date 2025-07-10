@@ -29,8 +29,8 @@ const parseArtistName = (artistString: string): string => {
 };
 
 // Convert backend response to frontend format
-const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syncMode: boolean = false): Song => {
-  const { metadata, score, offset_seconds, offset_formatted, youtube_playback_url, processing_time } = backendResponse;
+const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syncMode: boolean = false, timerADuration: number = 0): Song => {
+  const { metadata, score, offset_seconds, offset_formatted, youtube_playback_url } = backendResponse;
   
   // Parse primary artists and get display name
   const primaryArtists = metadata.artists
@@ -62,7 +62,7 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
   };
 
   // Build YouTube Music URL for manual "Play on YouTube Music" button clicks
-  const buildYouTubeMusicUrl = (url: string | null, offsetSeconds: number = 0, syncMode: boolean = false, processingTime: number = 0): string | undefined => {
+  const buildYouTubeMusicUrl = (url: string | null, offsetSeconds: number = 0, syncMode: boolean = false, timerADuration: number = 0): string | undefined => {
     if (!url) return undefined;
     
     // If it's already a YouTube Music URL, return as is
@@ -75,11 +75,11 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
       const videoId = extractVideoId(url);
       
       if (videoId) {
-        // Calculate sync-aware timestamp
+        // Calculate sync-aware timestamp using Timer A
         let finalOffset = offsetSeconds;
         if (syncMode) {
-          // Add recording time (5 seconds) + processing time + 200ms buffer for sync mode
-          finalOffset = offsetSeconds + 5 + (processingTime / 1000) + 3;
+          // Add Timer A duration (real-world time from button press to response)
+          finalOffset = offsetSeconds + timerADuration + 1;
         }
         
         // Create YouTube Music URL with timestamp
@@ -93,7 +93,7 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
   };
 
   // Build auto-opening URL optimized for browser opening
-  const buildAutoOpenUrl = (url: string | null, offsetSeconds: number = 0, syncMode: boolean = false, processingTime: number = 0): string | undefined => {
+  const buildAutoOpenUrl = (url: string | null, offsetSeconds: number = 0, syncMode: boolean = false, timerADuration: number = 0): string | undefined => {
     if (!url) return undefined;
     
     // For auto-opening, we prefer regular YouTube URLs as they have better browser compatibility
@@ -103,11 +103,11 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
       const videoId = extractVideoId(url);
       
       if (videoId) {
-        // Calculate sync-aware timestamp
+        // Calculate sync-aware timestamp using Timer A
         let finalOffset = offsetSeconds;
         if (syncMode) {
-          // Add recording time (5 seconds) + processing time + 200ms buffer for sync mode
-          finalOffset = offsetSeconds + 5 + (processingTime / 1000) + 3;
+          // Add Timer A duration (real-world time from button press to response)
+          finalOffset = offsetSeconds + timerADuration+1;
         }
         
         // Create regular YouTube URL with timestamp for better auto-opening compatibility
@@ -120,11 +120,11 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
     if (url.includes('music.youtube.com/watch')) {
       const videoId = extractVideoId(url);
       if (videoId) {
-        // Calculate sync-aware timestamp
+        // Calculate sync-aware timestamp using Timer A
         let finalOffset = offsetSeconds;
         if (syncMode) {
-          // Add recording time (5 seconds) + processing time + 200ms buffer for sync mode
-          finalOffset = offsetSeconds + 5 + (processingTime / 1000) + 3;
+          // Add Timer A duration (real-world time from button press to response)
+          finalOffset = offsetSeconds + timerADuration + 1;
         }
         
         const timestampParam = finalOffset > 0 ? `&t=${Math.round(finalOffset)}s` : '';
@@ -147,9 +147,9 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
     duration: metadata.duration_seconds || 0,
     popularity: metadata.track_popularity,
     youtubeUrl: metadata.youtube_url || undefined,
-    youtubeAutoOpenUrl: buildAutoOpenUrl(youtube_playback_url || metadata.youtube_url, offset_seconds, syncMode, processing_time),
-    youtubeMusicUrl: buildYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url, offset_seconds, syncMode, processing_time),
-    youtubePlaybackUrl: buildYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url, offset_seconds, syncMode, processing_time), // Backward compatibility
+    youtubeAutoOpenUrl: buildAutoOpenUrl(youtube_playback_url || metadata.youtube_url, offset_seconds, syncMode, timerADuration),
+    youtubeMusicUrl: buildYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url, offset_seconds, syncMode, timerADuration),
+    youtubePlaybackUrl: buildYouTubeMusicUrl(youtube_playback_url || metadata.youtube_url, offset_seconds, syncMode, timerADuration), // Backward compatibility
     shareableUrl: shareableUrl,
     spotifyUrl: metadata.spotify_url || undefined,
     appleMusicUrl: metadata.apple_music_url || undefined,
@@ -161,7 +161,7 @@ const convertBackendResponseToSong = (backendResponse: BackendMatchResponse, syn
 export class MusicIdentificationAPI {
   private lastRequestTime = 0;
 
-  async getSongMetadata(songId: number, syncMode: boolean = false): Promise<MatchResult> {
+  async getSongMetadata(songId: number, syncMode: boolean = false, timerADuration: number = 0): Promise<MatchResult> {
     const startTime = Date.now();
 
     try {
@@ -192,7 +192,7 @@ export class MusicIdentificationAPI {
           metadata: metadata
         };
         
-        const song = convertBackendResponseToSong(backendResponse, syncMode);
+        const song = convertBackendResponseToSong(backendResponse, syncMode, timerADuration);
         
         return {
           success: true,
@@ -223,7 +223,7 @@ export class MusicIdentificationAPI {
     }
   }
 
-  async identifyMusic(audioBlob: Blob, syncMode: boolean = false): Promise<MatchResult> {
+  async identifyMusic(audioBlob: Blob, syncMode: boolean = false, timerADuration: number = 0): Promise<MatchResult> {
     const now = Date.now();
     
     // Rate limiting check
@@ -258,9 +258,8 @@ export class MusicIdentificationAPI {
         // Success response
         const backendResponse: BackendMatchResponse = await response.json();
         
-        // console.log('✅ Backend Response:', backendResponse); // For debugging
         
-        const song = convertBackendResponseToSong(backendResponse, syncMode);
+        const song = convertBackendResponseToSong(backendResponse, syncMode, timerADuration);
         
         return {
           success: true,
